@@ -33,8 +33,49 @@ const generateDefaultItems = (size) => {
 
 const generateItems = (size = 10) => {
   const units = [
-    {id: generateId(), hp: 5, type: 'x', playerId: 'human', ap: 1},
-    {id: generateId(), hp: 5, type: 'o', playerId: 'ai', ap: 1},
+    {
+      id: generateId(),
+      hp: 5, type: 'x',
+      playerId: 'human',
+      ap: 1,
+      behaviorName: 'farmer',
+      conditionalActions: [
+        {
+          action: {
+            type: 'ATTACK',
+            payload: {
+              agentId: 1,
+              targetId: 2,
+            }
+          },
+          condition: () => true,
+        },
+      ]
+    },
+    {
+      id: generateId(),
+      hp: 5,
+      type: 'o',
+      playerId: 'ai',
+      ap: 1,
+      behaviorName: 'farmer',
+      conditionalActions: [
+        {
+          action: {type: 'FAKE'},
+          condition: () => false
+        },
+        {
+          action: {
+            type: 'ATTACK',
+            payload: {
+              agentId: 2,
+              targetId: 1,
+            }
+          },
+          condition: () => true,
+        },
+      ],
+    },
   ];
 
   const items = [

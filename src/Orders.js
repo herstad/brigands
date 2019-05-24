@@ -12,7 +12,9 @@ import {
 import {ReducerDispatch} from "./App";
 
 const isSelectedAction = (type, state) => {
-  const itemAction = getItemById(state.selectedId, state.items).action;
+  //TODO get first action that can be performed
+  const itemAction = getItemById(state.selectedId, state.items).conditionalActions[0].action;
+  console.log(itemAction);
   return itemAction && type === itemAction.type;
 };
 
@@ -27,13 +29,22 @@ const farmerHasFarm = (state) => {
 
 const getButtonColor = (type, state) => isSelectedAction(type, state) ? 'primary' : 'default';
 
+const playerItemsWithAp = (playerId) => (items) => {
+  return getItemsByPlayer(playerId, items)
+    .filter(item => item.ap);
+};
+
+// TODO change so that misses picks DEFAULT_EVENT behavior (add some itemId)
+const getNextActions = (state) => (items) => {
+  return items.map((item) => item.conditionalActions.find((conditionalAction) => conditionalAction.condition(state)));
+};
+
 function TurnButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
   const {items, activePlayerId} = state;
   const handleEndTurn = (playerId) => () => {
-    getItemsByPlayer(playerId, items)
-      .filter((item) => item.action && item.ap)
-      .forEach((item) => item.condition(state) ? dispatch(item.action) : undefined);
+    getNextActions(state)(playerItemsWithAp(playerId)(items))
+      .forEach((conditionalAction) => conditionalAction && conditionalAction.condition(state) ? dispatch(conditionalAction.action) : undefined);
     dispatch({
       type: 'END_TURN',
       payload: playerId

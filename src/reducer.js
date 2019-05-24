@@ -35,11 +35,16 @@ const consumeAp = (action, state) => {
     ap: 0,
     action,
     condition,
-
   };
+  // TODO rewrite without if
   if (!!selectedItem.training) {
     const conditionalAction = {action, condition};
     selectedItem.behaviorTraining.conditionalActions.push(conditionalAction);
+  } else {
+    const index = selectedItem.conditionalActions.findIndex(conditionalAction => conditionalAction.action.type === action.type);
+    if (index > 0) {
+      selectedItem.conditionalActions = selectedItem.conditionalActions.slice(index);
+    }
   }
   return updateItemById(selectedItem, state);
 };
@@ -146,18 +151,24 @@ export default (state, action) => {
     case 'FINISH_TRAIN_EVENT': {
       const {agentId} = payload;
       const agent = getItemById(agentId, state.items);
-      const behavior = state.behaviors[agent.behaviorTraining.name] || {};
+      const {name, eventType, conditionalActions} = agent.behaviorTraining;
+      const behavior = state.behaviors[name] || {};
       const updatedBehavior = {
         ...behavior,
-        [agent.behaviorTraining.eventType]: {conditionalActions: agent.behaviorTraining.conditionalActions},
+        name,
+        [eventType]: {
+          eventType,
+          conditionalActions,
+        },
       };
       const updatedBehaviorState = {
         ...state,
-        behaviors: {...state.behaviors, [agent.behaviorTraining.name]: updatedBehavior}
+        behaviors: {...state.behaviors, [name]: updatedBehavior}
       };
       return updateItemById({
         ...agent,
         behaviorTraining: {},
+        conditionalActions,
         training: false,
       }, updatedBehaviorState);
 
