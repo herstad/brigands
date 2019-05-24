@@ -14,7 +14,6 @@ import {ReducerDispatch} from "./App";
 const isSelectedAction = (type, state) => {
   //TODO get first action that can be performed
   const itemAction = getItemById(state.selectedId, state.items).conditionalActions[0].action;
-  console.log(itemAction);
   return itemAction && type === itemAction.type;
 };
 
@@ -73,6 +72,36 @@ function AttackButton({targetId}) {
     })
   };
   return (<Button color={color} onClick={handleAttack}>Attack Enemy</Button>);
+}
+
+const moveCondition = (targetFunc) => (state) => {
+  const agent = getItemById(state.selectedId, state.items);
+  const target = targetFunc(state);
+  return selectedItemHasAp(state) && !(agent.x === target.x && agent.y === target.y);
+};
+
+const targetClosestType = type => state => state.items.find(item => item.type === type);
+
+function MoveToGrassButton() {
+  const {state, dispatch} = useContext(ReducerDispatch);
+  const targetClosestGrass = targetClosestType('grass');
+
+  const condition = moveCondition(targetClosestGrass);
+  if (!condition(state)) {
+    return null;
+  }
+  const color = getButtonColor('MOVE', state);
+  const handleMoveToGrass = () => {
+    dispatch({
+      type: 'MOVE',
+      payload: {
+        agentId: state.selectedId,
+        targetId: targetClosestGrass(state).id,
+        condition,
+      }
+    })
+  };
+  return (<Button color={color} onClick={handleMoveToGrass}>Move To Grass</Button>);
 }
 
 function DefendButton({areaId}) {
@@ -176,6 +205,7 @@ export default function Orders() {
           getEnemyItems(state).map((enemy) => <AttackButton key={enemy.id} targetId={enemy.id}/>)
         }
         <DefendButton areaId={5}/>
+        <MoveToGrassButton/>
         <BuildFarmButton/>
         <PlantCropButton/>
         <HarvestCropButton/>
