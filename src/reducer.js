@@ -13,6 +13,10 @@ import {
 } from "./itemsUtil";
 import {move, toward} from "./movement";
 
+export const selectItemById = id => state => getItemById(id, state.items);
+
+export const selectSelectedItem = (state) => getItemById(state.selectedId, state.items);
+
 const nextPlayer = (activePlayerId) => {
   const index = PLAYERS.findIndex((id) => id === activePlayerId);
   return PLAYERS[(index + 1) % PLAYERS.length];

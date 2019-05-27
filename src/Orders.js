@@ -2,23 +2,18 @@ import React, {useContext} from 'react';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
-import {
-  getEnemyItems,
-  getItemById,
-  getItemByXYAndType,
-  getItemsByPlayer,
-  getSelectedItem
-} from "./itemsUtil";
+import {getEnemyItems, getItemById, getItemByXYAndType, getItemsByPlayer} from "./itemsUtil";
 import {ReducerDispatch} from "./App";
+import {selectItemById, selectSelectedItem} from "./reducer";
 
 const isSelectedAction = (type, state) => {
   //TODO get first action that can be performed
-  const itemAction = getItemById(state.selectedId, state.items).conditionalActions[0].action;
+  const itemAction = selectSelectedItem(state).conditionalActions[0].action;
   return itemAction && type === itemAction.type;
 };
 
 const selectedItemHasAp = (state) => {
-  const selectedItem = getSelectedItem(state);
+  const selectedItem = selectSelectedItem(state);
   return selectedItem.ap > 0 && selectedItem.playerId === state.activePlayerId;
 };
 
@@ -90,7 +85,7 @@ const targetClosestType = agent => type => state => state.items.filter(item => i
 
 function MoveToGrassButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
-  const agent = getItemById(state.selectedId, state.items);
+  const agent = selectSelectedItem(state);
   const targetClosestGrass = targetClosestType(agent)('grass');
 
   const condition = moveCondition(targetClosestGrass);
@@ -103,8 +98,8 @@ function MoveToGrassButton() {
     dispatch({
       type: 'MOVE',
       payload: {
-        getAgent: (currentState) => getItemById(agentId, currentState.items),
-        getTarget: (currentState) => targetClosestGrass(currentState),
+        getAgent: selectItemById(agentId),
+        getTarget: targetClosestGrass,
         condition,
       }
     })
@@ -138,7 +133,7 @@ function BuildFarmButton() {
   const condition = state => {
     return selectedItemHasAp(state)
       && !farmerHasFarm(state)
-      && getItemByXYAndType(state.items)(getSelectedItem(state))('grass');
+      && getItemByXYAndType(state.items)(selectSelectedItem(state))('grass');
   };
   if (!condition(state)) {
     return null;
@@ -161,7 +156,7 @@ function PlantCropButton() {
   const condition = state => {
     return selectedItemHasAp(state)
       && farmerHasFarm(state)
-      && getItemByXYAndType(state.items)(getSelectedItem(state))('grass');
+      && getItemByXYAndType(state.items)(selectSelectedItem(state))('grass');
   };
   if (!condition(state)) {
     return null;
@@ -180,10 +175,10 @@ function PlantCropButton() {
 
 function HarvestCropButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
-  const selectedItem = getSelectedItem(state);
+  const selectedItem = selectSelectedItem(state);
   const target = getItemByXYAndType(state.items)(selectedItem)('crop');
   const condition = state => {
-    const selectedItem = getSelectedItem(state);
+    const selectedItem = selectSelectedItem(state);
     const target = getItemByXYAndType(state.items)(selectedItem)('crop');
     return selectedItemHasAp(state) && !!target;
   };

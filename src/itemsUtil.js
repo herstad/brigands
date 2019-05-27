@@ -2,7 +2,6 @@ import {PLAYERS} from "./stateGenerator";
 
 export const isPlayer = (playerId, item) => item.playerId === playerId;
 export const matchPlayer = (playerId) => (item) => isPlayer(playerId, item);
-export const getSelectedItem = (state) => getItemById(state.selectedId, state.items);
 export const getItemById = (id, items) => items.find((item) => item.id === id);
 export const getItemsByPlayer = (playerId, items) => items.filter(matchPlayer(playerId));
 export const getItemsByXY = items => ({x, y}) => items.filter((item) => item.x === x && item.y === y);
