@@ -107,26 +107,6 @@ function MoveToGrassButton() {
   return (<Button color={color} onClick={handleMoveToGrass}>Move To Grass</Button>);
 }
 
-function DefendButton({areaId}) {
-  const {state, dispatch} = useContext(ReducerDispatch);
-  const condition = selectedItemHasAp;
-  if (!condition(state)) {
-    return null;
-  }
-  const color = getButtonColor('DEFEND', state);
-  const handleDefend = () => {
-    dispatch({
-      type: 'DEFEND',
-      payload: {
-        agentId: state.selectedId,
-        areaId: areaId,
-        condition,
-      }
-    })
-  };
-  return (<Button color={color} onClick={handleDefend}>Defend Area {areaId}</Button>);
-}
-
 function BuildFarmButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
 
@@ -149,7 +129,6 @@ function BuildFarmButton() {
   };
   return (<Button color='default' onClick={handleBuildFarm}>Build farm</Button>);
 }
-
 
 function PlantCropButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
@@ -207,7 +186,6 @@ export default function Orders() {
         {
           getEnemyItems(state).map((enemy) => <AttackButton key={enemy.id} targetId={enemy.id}/>)
         }
-        <DefendButton areaId={5}/>
         <MoveToGrassButton/>
         <BuildFarmButton/>
         <PlantCropButton/>

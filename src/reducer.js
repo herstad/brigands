@@ -1,6 +1,5 @@
 import {generateId, generateState, PLAYERS} from "./stateGenerator";
 import {
-  getEnemyItems,
   getItemById,
   getItemByXYAndType,
   getItemsByPlayer,
@@ -110,20 +109,6 @@ export default (state, action) => {
       } else {
         console.log('target not in range!');
         return updateItemById(move(attacker, toward(target)), consumedState);
-      }
-    }
-    case 'DEFEND': {
-      const {agentId, areaId} = payload;
-      const consumedState = consumeAp(action, state);
-      const defender = selectItemById(agentId)(consumedState);
-      const area = selectItemById(areaId)(consumedState);
-      const target = getEnemyItems(state).find((enemy) => inRange(defender, enemy));
-      if (!!target) {
-        console.log('target in range!');
-        return updateItemById({...target, hp: target.hp - 1}, consumedState);
-      } else {
-        console.log('target not in range!');
-        return updateItemById(move(defender, toward(area)), consumedState);
       }
     }
     case 'MOVE': {
