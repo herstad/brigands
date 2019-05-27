@@ -30,8 +30,10 @@ const isLoser = (playerId, items) => {
 
 const consumeAp = (action, state) => {
   const {condition} = action.payload;
+  // TODO require getAgent
+  const agent = action.payload.agentId !== undefined ? getItemById(action.payload.agentId, state.items) : action.payload.getAgent(state);
   const selectedItem = {
-    ...getItemById(action.payload.agentId, state.items),
+    ...agent,
     ap: 0,
     action,
     condition,
