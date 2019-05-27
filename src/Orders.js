@@ -80,11 +80,18 @@ const moveCondition = (targetFunc) => (state) => {
   return selectedItemHasAp(state) && !(agent.x === target.x && agent.y === target.y);
 };
 
-const targetClosestType = type => state => state.items.find(item => item.type === type);
+const calculateDistance = agent => target => Math.abs(agent.x - target.x) + Math.abs(agent.y - target.y);
+
+const compareDistance = agent => (firstEl, secondEl) => {
+  const distance = calculateDistance(agent);
+  return distance(firstEl) - distance(secondEl);
+};
+const targetClosestType = agent => type => state => state.items.sort(compareDistance(agent)).find(item => item.type === type);
 
 function MoveToGrassButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
-  const targetClosestGrass = targetClosestType('grass');
+  const agent = getItemById(state.selectedId, state.items);
+  const targetClosestGrass = targetClosestType(agent)('grass');
 
   const condition = moveCondition(targetClosestGrass);
   if (!condition(state)) {
