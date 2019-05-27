@@ -35,7 +35,7 @@ const isLoser = (playerId, items) => {
 const consumeAp = (action, state) => {
   const {condition} = action.payload;
   // TODO require getAgent
-  const agent = action.payload.agentId !== undefined ? getItemById(action.payload.agentId, state.items) : action.payload.getAgent(state);
+  const agent = action.payload.agentId !== undefined ? selectItemById(action.payload.agentId)(state) : action.payload.getAgent(state);
   const selectedItem = {
     ...agent,
     ap: 0,
@@ -56,7 +56,7 @@ const consumeAp = (action, state) => {
 };
 
 const createBuilding = (builderId, type, state) => {
-  const builder = getItemById(builderId, state.items);
+  const builder = selectItemById(builderId)(state);
   const target = getItemByXYAndType(state.items)(builder)('grass');
   const clearedItems = removeItemById(target.id, state.items);
   const building = {
@@ -102,8 +102,8 @@ export default (state, action) => {
     case 'ATTACK': {
       const {agentId, targetId} = payload;
       const consumedState = consumeAp(action, state);
-      const attacker = getItemById(agentId, consumedState.items);
-      const target = getItemById(targetId, consumedState.items);
+      const attacker = selectItemById(agentId)(consumedState);
+      const target = selectItemById(targetId)(consumedState);
       if (inRange(attacker, target)) {
         console.log('target in range!');
         return updateItemById({...target, hp: target.hp - 1}, consumedState);
@@ -115,8 +115,8 @@ export default (state, action) => {
     case 'DEFEND': {
       const {agentId, areaId} = payload;
       const consumedState = consumeAp(action, state);
-      const defender = getItemById(agentId, consumedState.items);
-      const area = getItemById(areaId, consumedState.items);
+      const defender = selectItemById(agentId)(consumedState);
+      const area = selectItemById(areaId)(consumedState);
       const target = getEnemyItems(state).find((enemy) => inRange(defender, enemy));
       if (!!target) {
         console.log('target in range!');
@@ -141,7 +141,7 @@ export default (state, action) => {
     }
     case 'HARVEST_CROP': {
       const consumedState = consumeAp(action, state);
-      const {x, y} = getItemById(payload.targetId, state.items);
+      const {x, y} = selectItemById(payload.targetId)(state);
       const grass = {
         id: generateId(),
         x,
@@ -163,7 +163,7 @@ export default (state, action) => {
     }
     case 'FINISH_TRAIN_EVENT': {
       const {agentId} = payload;
-      const agent = getItemById(agentId, state.items);
+      const agent = selectItemById(agentId)(state);
       const {name, eventType, conditionalActions} = agent.behaviorTraining;
       const behavior = state.behaviors[name] || {};
       const updatedBehavior = {

@@ -2,7 +2,7 @@ import React, {useContext} from 'react';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
-import {getEnemyItems, getItemById, getItemByXYAndType, getItemsByPlayer} from "./itemsUtil";
+import {getEnemyItems, getItemByXYAndType, getItemsByPlayer} from "./itemsUtil";
 import {ReducerDispatch} from "./App";
 import {selectItemById, selectSelectedItem} from "./reducer";
 
@@ -70,7 +70,7 @@ function AttackButton({targetId}) {
 }
 
 const moveCondition = (targetFunc) => (state) => {
-  const agent = getItemById(state.selectedId, state.items);
+  const agent = selectSelectedItem(state);
   const target = targetFunc(state);
   return selectedItemHasAp(state) && !(agent.x === target.x && agent.y === target.y);
 };

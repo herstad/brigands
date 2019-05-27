@@ -3,19 +3,20 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import LinearProgress from '@material-ui/core/LinearProgress';
-import {getItemById} from "./itemsUtil";
 import {ReducerDispatch} from "./App";
 import Button from "@material-ui/core/Button";
+import {selectItemById, selectSelectedItem} from "./reducer";
 
 function UnitCard() {
-  const {selectedId, items} = useContext(ReducerDispatch).state;
-  if (selectedId === undefined) {
+  const {state} = useContext(ReducerDispatch);
+  const selected = selectSelectedItem(state);
+  if (selected === undefined) {
     return null;
   }
-  const {id, playerId, x, y, hp, ap, type} = getItemById(selectedId, items);
+  const {id, playerId, x, y, hp, ap, type} = selected;
   const maxHp = 5;
   const relativeHp = hp / maxHp * 100;
-  const defaultEvent = {type: 'DEFAULT_EVENT', itemId: selectedId};
+  const defaultEvent = {type: 'DEFAULT_EVENT', itemId: selected.id};
   return (
     <Card>
       <CardContent>
@@ -69,8 +70,8 @@ function FinishTrainEventButton() {
 }
 
 function EventCard({event}) {
-  const {items} = useContext(ReducerDispatch).state;
-  const {x, y, type} = (event.itemId ? getItemById(event.itemId, items) : {});
+  const {state} = useContext(ReducerDispatch);
+  const {x, y, type} = (event.itemId ? selectItemById(event.itemId)(state) : {});
   return (
     <Card>
       <CardContent>
