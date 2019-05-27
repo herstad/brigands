@@ -121,10 +121,10 @@ export default (state, action) => {
       }
     }
     case 'MOVE': {
-      const {agentId, targetId} = payload;
+      const {getAgent, getTarget} = payload;
       const consumedState = consumeAp(action, state);
-      const agent = getItemById(agentId, consumedState.items);
-      const target = getItemById(targetId, consumedState.items);
+      const agent = getAgent(consumedState);
+      const target = getTarget(consumedState);
       return updateItemById(move(agent, toward(target)), consumedState);
     }
     case 'BUILD_FARM': {

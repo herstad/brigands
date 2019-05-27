@@ -86,7 +86,7 @@ const compareDistance = agent => (firstEl, secondEl) => {
   const distance = calculateDistance(agent);
   return distance(firstEl) - distance(secondEl);
 };
-const targetClosestType = agent => type => state => state.items.sort(compareDistance(agent)).find(item => item.type === type);
+const targetClosestType = agent => type => state => state.items.filter(item => item.type === type).sort(compareDistance(agent))[0];
 
 function MoveToGrassButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
@@ -99,11 +99,12 @@ function MoveToGrassButton() {
   }
   const color = getButtonColor('MOVE', state);
   const handleMoveToGrass = () => {
+    const agentId = state.selectedId;
     dispatch({
       type: 'MOVE',
       payload: {
-        agentId: state.selectedId,
-        targetId: targetClosestGrass(state).id,
+        getAgent: (currentState) => getItemById(agentId, currentState.items),
+        getTarget: (currentState) => targetClosestGrass(currentState),
         condition,
       }
     })
