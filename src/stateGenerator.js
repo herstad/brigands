@@ -1,3 +1,5 @@
+import {selectItemById} from "./reducer";
+
 export const PLAYERS = ['human', 'ai'];
 
 export const generateState = () => {
@@ -44,8 +46,8 @@ const generateItems = (size = 10) => {
           action: {
             type: 'ATTACK',
             payload: {
-              agentId: 1,
-              targetId: 2,
+              getAgent: selectItemById(1),
+              getTarget: selectItemById(2),
             }
           },
           condition: () => true,
@@ -63,16 +65,6 @@ const generateItems = (size = 10) => {
         {
           action: {type: 'FAKE'},
           condition: () => false
-        },
-        {
-          action: {
-            type: 'ATTACK',
-            payload: {
-              agentId: 2,
-              targetId: 1,
-            }
-          },
-          condition: () => true,
         },
       ],
     },

@@ -60,8 +60,8 @@ function AttackButton({targetId}) {
     dispatch({
       type: 'ATTACK',
       payload: {
-        agentId: state.selectedId,
-        targetId,
+        getAgent: selectItemById(state.selectedId),
+        getTarget: selectItemById(targetId),
         condition,
       }
     })

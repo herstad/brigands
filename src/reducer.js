@@ -100,10 +100,10 @@ export default (state, action) => {
       return {...state, selectedId: payload};
     }
     case 'ATTACK': {
-      const {agentId, targetId} = payload;
+      const {getAgent, getTarget} = payload;
       const consumedState = consumeAp(action, state);
-      const attacker = selectItemById(agentId)(consumedState);
-      const target = selectItemById(targetId)(consumedState);
+      const attacker = getAgent(consumedState);
+      const target = getTarget(consumedState);
       if (inRange(attacker, target)) {
         console.log('target in range!');
         return updateItemById({...target, hp: target.hp - 1}, consumedState);
