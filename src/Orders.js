@@ -6,11 +6,6 @@ import {getEnemyItems, getItemByXYAndType, getItemsByPlayer} from "./itemsUtil";
 import {ReducerDispatch} from "./App";
 import {selectItemById, selectSelectedItem} from "./reducer";
 
-const isSelectedAction = (type, state) => {
-  //TODO get first action that can be performed
-  const itemAction = selectSelectedItem(state).conditionalActions[0].action;
-  return itemAction && type === itemAction.type;
-};
 
 const selectedItemHasAp = (state) => {
   const selectedItem = selectSelectedItem(state);
@@ -28,15 +23,35 @@ const playerItemsWithAp = (playerId) => (items) => {
     .filter(item => item.ap);
 };
 
-// TODO change so that misses picks DEFAULT_EVENT behavior (add some itemId)
+const getNextAction = state => conditionalActions => conditionalActions.find((conditionalAction) => conditionalAction.condition(state));
+
 const getNextActions = (state) => (items) => {
-  return items.map((item) => item.conditionalActions.find((conditionalAction) => conditionalAction.condition(state)));
+  return items.map((item) => getNextAction(state)(item.conditionalActions));
+};
+
+const getItemsWithoutActions = state => items => {
+  return items.filter(item => !getNextAction(state)(item.conditionalActions))
+};
+
+const isSelectedAction = (type, state) => {
+  const conditionalAction = getNextAction(state)(selectSelectedItem(state).conditionalActions);
+  return conditionalAction && type === conditionalAction.action.type;
 };
 
 function TurnButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
   const {items, activePlayerId} = state;
   const handleEndTurn = (playerId) => () => {
+
+    // TODO make nicer
+    getItemsWithoutActions(state)(playerItemsWithAp(playerId)(items)).forEach(item => dispatch({
+      type: 'SET_UNIT_BEHAVIOR',
+      payload: {
+        getAgent: selectItemById(item.id),
+        eventType: 'DEFAULT_EVENT',
+      }
+    }));
+
     getNextActions(state)(playerItemsWithAp(playerId)(items))
       .forEach((conditionalAction) => conditionalAction && conditionalAction.condition(state) ? dispatch(conditionalAction.action) : undefined);
     dispatch({

@@ -16,6 +16,12 @@ export const selectItemById = id => state => getItemById(id, state.items);
 
 export const selectSelectedItem = (state) => getItemById(state.selectedId, state.items);
 
+const selectEventBehavior = behaviorName => eventType => state => {
+  const behavior = state.behaviors[behaviorName] || {};
+  const eventBehavior = behavior[eventType] || {};
+  return eventBehavior.conditionalActions || [];
+}
+
 const nextPlayer = (activePlayerId) => {
   const index = PLAYERS.findIndex((id) => id === activePlayerId);
   return PLAYERS[(index + 1) % PLAYERS.length];
@@ -170,6 +176,13 @@ export default (state, action) => {
         training: false,
       }, updatedBehaviorState);
 
+    }
+    case 'SET_UNIT_BEHAVIOR': {
+      const agent = payload.getAgent(state);
+      const conditionalActions = selectEventBehavior(agent.behaviorName)(payload.eventType)(state);
+      console.log('Updated actions for event: ' + payload.eventType);
+      console.log(conditionalActions);
+      return updateItemById({...agent, conditionalActions: [...conditionalActions]}, state);
     }
     default:
       return state;
