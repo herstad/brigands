@@ -20,7 +20,7 @@ const selectEventBehavior = behaviorName => eventType => state => {
   const behavior = state.behaviors[behaviorName] || {};
   const eventBehavior = behavior[eventType] || {};
   return eventBehavior.conditionalActions || [];
-}
+};
 
 const nextPlayer = (activePlayerId) => {
   const index = PLAYERS.findIndex((id) => id === activePlayerId);
@@ -80,6 +80,7 @@ const plantedShouldGrow = turn => item => item.type === 'planted' && item.create
 export default (state, action) => {
   console.log('Action');
   console.log(action);
+  console.log('State');
   console.log(state);
   const {payload} = action;
   switch (action.type) {
