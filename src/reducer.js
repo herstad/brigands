@@ -22,6 +22,8 @@ const selectEventBehavior = behaviorName => eventType => state => {
   return eventBehavior.conditionalActions || [];
 };
 
+export const selectEvents = state => state.events;
+
 const nextPlayer = (activePlayerId) => {
   const index = PLAYERS.findIndex((id) => id === activePlayerId);
   return PLAYERS[(index + 1) % PLAYERS.length];

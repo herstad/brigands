@@ -4,7 +4,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import {getEnemyItems, getItemByXYAndType, getItemsByPlayer} from "./itemsUtil";
 import {ReducerDispatch} from "./App";
-import {selectItemById, selectSelectedItem} from "./reducer";
+import {selectEvents, selectItemById, selectSelectedItem} from "./reducer";
 
 //TODO replace id with getAgent
 const unitHasAp = id => state => {
@@ -91,7 +91,7 @@ function AttackButton({targetId}) {
 const moveCondition = getTarget => getAgent => state => {
   const agent = getAgent(state);
   const target = getTarget(state);
-  return unitHasAp(agent.id)(state) && !(agent.x === target.x && agent.y === target.y);
+  return agent && target && unitHasAp(agent.id)(state) && !(agent.x === target.x && agent.y === target.y);
 };
 
 const calculateDistance = agent => target => Math.abs(agent.x - target.x) + Math.abs(agent.y - target.y);
@@ -102,28 +102,50 @@ const compareDistance = agent => (firstEl, secondEl) => {
 };
 const targetClosestType = getAgent => type => state => state.items.filter(item => item.type === type).sort(compareDistance(getAgent(state)))[0];
 
+const handleMove = getAgent => getTarget => condition => dispatch => () => {
+  dispatch({
+    type: 'MOVE',
+    payload: {
+      getAgent,
+      getTarget,
+      condition,
+    }
+  })
+};
+
 function MoveToGrassButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
-  const agent = selectSelectedItem(state);
-  const getAgent = selectItemById(agent.id);
-  const targetClosestGrass = targetClosestType(getAgent)('grass');
-
-  const condition = moveCondition(targetClosestGrass)(getAgent);
+  const getAgent = selectItemById(state.selectedId);
+  const getTarget = targetClosestType(getAgent)('grass');
+  const condition = moveCondition(getTarget)(getAgent);
   if (!condition(state)) {
     return null;
   }
   const color = getButtonColor('MOVE', state);
-  const handleMoveToGrass = () => {
-    dispatch({
-      type: 'MOVE',
-      payload: {
-        getAgent,
-        getTarget: targetClosestGrass,
-        condition,
-      }
-    })
-  };
+  const handleMoveToGrass = handleMove(getAgent)(getTarget)(condition)(dispatch);
   return (<Button color={color} onClick={handleMoveToGrass}>Move To Grass</Button>);
+}
+
+function MoveToEventsButton() {
+  const {state} = useContext(ReducerDispatch);
+  const events = selectEvents(state).filter(event => event.itemId !== undefined);
+  if (!events) {
+    return null;
+  }
+  return events.map(event => <MoveToEventButton key={event.itemId} event={event}/>);
+}
+
+function MoveToEventButton({event}) {
+  const {state, dispatch} = useContext(ReducerDispatch);
+  const getAgent = selectItemById(state.selectedId);
+  const getTarget = selectItemById(event.itemId);
+  const condition = moveCondition(getTarget)(getAgent);
+  if (!condition(state)) {
+    return null;
+  }
+  const color = getButtonColor('MOVE', state);
+  const handleMoveToEvent = handleMove(getAgent)(getTarget)(condition)(dispatch);
+  return (<Button color={color} onClick={handleMoveToEvent}>Move To Event {event.type} </Button>);
 }
 
 function BuildFarmButton() {
@@ -209,6 +231,7 @@ export default function Orders() {
           getEnemyItems(state).map((enemy) => <AttackButton key={enemy.id} targetId={enemy.id}/>)
         }
         <MoveToGrassButton/>
+        <MoveToEventsButton/>
         <BuildFarmButton/>
         <PlantCropButton/>
         <HarvestCropButton/>
