@@ -37,36 +37,38 @@ function UnitCard() {
 
 function TrainEventButton({event}) {
   const {state, dispatch} = useContext(ReducerDispatch);
-  if (state.selectedId === undefined) {
+  const agent = selectSelectedItem(state);
+  if (agent === undefined || agent.training) {
     return null;
   }
   const handleTrainEvent = () => {
     dispatch({
       type: 'TRAIN_EVENT',
       payload: {
-        agentId: event.itemId,
+        agentId: agent.id,
         event,
       }
     })
   };
-  return (<Button color='default' onClick={handleTrainEvent}>Train Default Behavior</Button>);
+  return (<Button color='default' onClick={handleTrainEvent}>Train {event.type} Behavior</Button>);
 }
 
 function FinishTrainEventButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
-  if (state.selectedId === undefined) {
+  const agent = selectSelectedItem(state);
+  if (agent === undefined || !agent.training) {
     return null;
   }
   const handleTrainEvent = () => {
     dispatch({
       type: 'FINISH_TRAIN_EVENT',
       payload: {
-        agentId: state.selectedId,
+        agentId: agent.id,
       }
     })
   };
   return (
-    <Button color='default' onClick={handleTrainEvent}>Finish train Default Behavior</Button>);
+    <Button color='default' onClick={handleTrainEvent}>Finish train event Behavior</Button>);
 }
 
 function EventCard({event}) {
@@ -79,6 +81,7 @@ function EventCard({event}) {
         <Typography>x:{x}</Typography>
         <Typography>y:{y}</Typography>
         <Typography>itemType:{type}</Typography>
+        <TrainEventButton event={event}/>
       </CardContent>
     </Card>
   )

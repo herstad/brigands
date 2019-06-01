@@ -201,9 +201,10 @@ function HarvestCropButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
   const agent = selectSelectedItem(state);
   const getAgent = selectItemById(agent.id);
+  //TODO duplicate
   const target = getItemByXYAndType(state.items)(getAgent(state))('crop');
   const condition = state => {
-    return unitHasAp(agent.id)(state) && !!target;
+    return unitHasAp(agent.id)(state) && getItemByXYAndType(state.items)(getAgent(state))('crop');
   };
   if (!condition(state)) {
     return null;

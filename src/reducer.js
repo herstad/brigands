@@ -91,7 +91,12 @@ export default (state, action) => {
       const grownCrops = apItems.filter(plantedShouldGrow(state.turn));
       const newCrops = updateItems(plantedShouldGrow(state.turn))({type: 'crop',})(grownCrops);
       const items = replaceItems(apItems)(newCrops);
-      const events = newCrops.map((item) => ({type: 'CROP_GROWN', itemId: item.id}));
+      const cropEvents = newCrops.map((item) => ({
+        type: 'CROP_GROWN',
+        itemId: item.id,
+        turn: state.turn
+      }));
+      const events = [...state.events, ...cropEvents].filter(e => e.turn === state.turn);
       return {
         ...state,
         items,
