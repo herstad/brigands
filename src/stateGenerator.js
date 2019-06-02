@@ -1,5 +1,3 @@
-import {selectItemById} from "./reducer";
-
 export const PLAYERS = ['human', 'ai'];
 
 export const generateState = () => {
@@ -41,8 +39,8 @@ const generateItems = (size = 10) => {
       playerId: 'human',
       ap: 1,
       behaviorName: 'farmer',
-      conditionalActions: [
-      ]
+      conditionalActions: [],
+      events: [],
     },
     {
       id: generateId(),
@@ -51,12 +49,8 @@ const generateItems = (size = 10) => {
       playerId: 'ai',
       ap: 1,
       behaviorName: 'farmer',
-      conditionalActions: [
-        {
-          action: {type: 'FAKE'},
-          condition: () => false
-        },
-      ],
+      conditionalActions: [],
+      events: [],
     },
   ];
 

@@ -49,11 +49,24 @@ const isSelectedAction = (type, state) => {
   return conditionalAction && type === conditionalAction.action.type;
 };
 
+const setNextBehavior = playerId => state => {
+  const {items, events} = state;
+  const conditionalActions = getItemsWithoutActions(state)(playerItemsWithAp(playerId)(items)).map(item => ({
+    type: 'SET_UNIT_BEHAVIOR',
+    payload: {
+      getAgent: selectItemById(item.id),
+      eventType: 'DEFAULT_EVENT',
+    }
+  }));
+  return [];
+};
+
 function TurnButton() {
+
+
   const {state, dispatch} = useContext(ReducerDispatch);
   const {items, activePlayerId} = state;
   const handleEndTurn = (playerId) => () => {
-
     // TODO make nicer
 
     getNextActions(state)(playerItemsWithAp(playerId)(items))
@@ -130,7 +143,7 @@ function MoveToEventsButton() {
   const {state} = useContext(ReducerDispatch);
   let events = selectEvents(state);
   const agent = selectSelectedItem(state);
-  if (agent && agent.training && !events.some(event=> event.type === agent.behaviorTraining.event.type)) {
+  if (agent && agent.training && !events.some(event => event.type === agent.behaviorTraining.event.type)) {
     events.push(agent.behaviorTraining.event);
   }
   events = events.filter(event => event.itemId !== undefined);

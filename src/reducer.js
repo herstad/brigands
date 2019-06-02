@@ -79,6 +79,11 @@ const createBuilding = (builderId, type, state) => {
 
 const plantedShouldGrow = turn => item => item.type === 'planted' && item.createdTurn + 5 <= turn;
 
+const hasBehaviorForEvent = item => event => state => {
+  const behavior = selectEventBehavior(item.behaviorName)(event.type)(state);
+  return !!behavior.length;
+};
+
 export default (state, action) => {
   console.log('Action');
   console.log(action);
@@ -90,13 +95,24 @@ export default (state, action) => {
       const apItems = updateItems((item) => isPlayer(payload, item))({ap: 1})(state.items);
       const grownCrops = apItems.filter(plantedShouldGrow(state.turn));
       const newCrops = updateItems(plantedShouldGrow(state.turn))({type: 'crop',})(grownCrops);
-      const items = replaceItems(apItems)(newCrops);
+      let items = replaceItems(apItems)(newCrops);
       const cropEvents = newCrops.map((item) => ({
+        id: generateId(),
         type: 'CROP_GROWN',
         itemId: item.id,
         turn: state.turn
       }));
       const events = [...state.events, ...cropEvents].filter(e => e.turn === state.turn);
+
+
+      const updatedEventItems = getItemsByPlayer(state.activePlayerId, items).map(item => (
+        {
+          ...item,
+          events: [...item.events, ...events.filter(event => hasBehaviorForEvent(item)(event)(state) || item.training)]
+        }));
+      items = replaceItems(items)(updatedEventItems);
+
+
       return {
         ...state,
         items,
