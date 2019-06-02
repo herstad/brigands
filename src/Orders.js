@@ -128,7 +128,12 @@ function MoveToGrassButton() {
 
 function MoveToEventsButton() {
   const {state} = useContext(ReducerDispatch);
-  const events = selectEvents(state).filter(event => event.itemId !== undefined);
+  let events = selectEvents(state);
+  const agent = selectSelectedItem(state);
+  if (agent && agent.training && !events.some(event=> event.type === agent.behaviorTraining.event.type)) {
+    events.push(agent.behaviorTraining.event);
+  }
+  events = events.filter(event => event.itemId !== undefined);
   if (!events) {
     return null;
   }

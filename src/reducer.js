@@ -156,7 +156,7 @@ export default (state, action) => {
       const {agentId, event} = payload;
       return updateItemById({
         id: agentId,
-        behaviorTraining: {name: 'farmer', eventType: event.type, conditionalActions: []},
+        behaviorTraining: {name: 'farmer', eventType: event.type, event, conditionalActions: []},
         training: true,
       }, state);
     }
