@@ -42,16 +42,6 @@ const generateItems = (size = 10) => {
       ap: 1,
       behaviorName: 'farmer',
       conditionalActions: [
-        {
-          action: {
-            type: 'ATTACK',
-            payload: {
-              getAgent: selectItemById(1),
-              getTarget: selectItemById(2),
-            }
-          },
-          condition: () => true,
-        },
       ]
     },
     {

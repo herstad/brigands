@@ -107,7 +107,8 @@ export default (state, action) => {
       };
     }
     case 'RESTART': {
-      return generateState();
+      const behaviors = state.behaviors;
+      return {...generateState(), behaviors};
     }
     case 'SET_SELECTED': {
       return {...state, selectedId: payload};
