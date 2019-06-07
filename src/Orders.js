@@ -61,6 +61,11 @@ const setNextBehavior = playerId => state => {
   return [];
 };
 
+const dispatchConditionalActions = conditionalActions => dispatch => state => {
+  return conditionalActions.filter(conditionalAction => conditionalAction.condition(state))
+    .forEach(conditionalAction => dispatch(conditionalAction.action));
+};
+
 function TurnButton() {
 
 
@@ -69,8 +74,9 @@ function TurnButton() {
   const handleEndTurn = (playerId) => () => {
     // TODO make nicer
 
-    getNextActions(state)(playerItemsWithAp(playerId)(items))
-      .forEach((conditionalAction) => conditionalAction && conditionalAction.condition(state) ? dispatch(conditionalAction.action) : undefined);
+
+    const conditionalActions = getNextActions(state)(playerItemsWithAp(playerId)(items));
+    dispatchConditionalActions(conditionalActions)(dispatch)(state);
     dispatch({
       type: 'END_TURN',
       payload: playerId
@@ -81,10 +87,14 @@ function TurnButton() {
   );
 }
 
+const shouldDisplayOrder = id => condition => state => unitHasAp(id)(state) && condition(state);
+
 function AttackButton({targetId}) {
   const {state, dispatch} = useContext(ReducerDispatch);
-  const condition = unitHasAp(selectSelectedItem(state).id);
-  if (!condition(state)) {
+  const getAgent = selectItemById(state.selectedId);
+  const getTarget = selectItemById(targetId);
+  const condition = () => true;
+  if (!shouldDisplayOrder(state.selectedId)(condition)(state)) {
     return null;
   }
   const color = getButtonColor('ATTACK', state);
@@ -92,8 +102,8 @@ function AttackButton({targetId}) {
     dispatch({
       type: 'ATTACK',
       payload: {
-        getAgent: selectItemById(state.selectedId),
-        getTarget: selectItemById(targetId),
+        getAgent,
+        getTarget,
         condition,
       }
     })
@@ -104,7 +114,7 @@ function AttackButton({targetId}) {
 const moveCondition = getTarget => getAgent => state => {
   const agent = getAgent(state);
   const target = getTarget(state);
-  return agent && target && unitHasAp(agent.id)(state) && !(agent.x === target.x && agent.y === target.y);
+  return agent && target && !(agent.x === target.x && agent.y === target.y);
 };
 
 const calculateDistance = agent => target => Math.abs(agent.x - target.x) + Math.abs(agent.y - target.y);
@@ -131,7 +141,7 @@ function MoveToGrassButton() {
   const getAgent = selectItemById(state.selectedId);
   const getTarget = targetClosestType(getAgent)('grass');
   const condition = moveCondition(getTarget)(getAgent);
-  if (!condition(state)) {
+  if (!shouldDisplayOrder(state.selectedId)(condition)(state)) {
     return null;
   }
   const color = getButtonColor('MOVE', state);
@@ -158,7 +168,7 @@ function MoveToEventButton({event}) {
   const getAgent = selectItemById(state.selectedId);
   const getTarget = selectItemById(event.itemId);
   const condition = moveCondition(getTarget)(getAgent);
-  if (!condition(state)) {
+  if (!shouldDisplayOrder(state.selectedId)(condition)(state)) {
     return null;
   }
   const color = getButtonColor('MOVE', state);
@@ -172,11 +182,9 @@ function BuildFarmButton() {
   const agent = selectSelectedItem(state);
   const getAgent = selectItemById(agent.id);
   const condition = state => {
-    return unitHasAp(agent.id)(state)
-      && !farmerHasFarm(getAgent)(state)
-      && getItemByXYAndType(state.items)(agent)('grass');
+    return !farmerHasFarm(getAgent)(state) && getItemByXYAndType(state.items)(agent)('grass');
   };
-  if (!condition(state)) {
+  if (!shouldDisplayOrder(agent.id)(condition)(state)) {
     return null;
   }
   const handleBuildFarm = () => {
@@ -196,11 +204,9 @@ function PlantCropButton() {
   const agent = selectSelectedItem(state);
   const getAgent = selectItemById(agent.id);
   const condition = state => {
-    return unitHasAp(agent.id)(state)
-      && farmerHasFarm(getAgent)(state)
-      && getItemByXYAndType(state.items)(getAgent(state))('grass');
+    return farmerHasFarm(getAgent)(state) && getItemByXYAndType(state.items)(getAgent(state))('grass');
   };
-  if (!condition(state)) {
+  if (!shouldDisplayOrder(agent.id)(condition)(state)) {
     return null;
   }
   const handlePlantCrop = () => {
@@ -221,10 +227,8 @@ function HarvestCropButton() {
   const getAgent = selectItemById(agent.id);
   //TODO duplicate
   const target = getItemByXYAndType(state.items)(getAgent(state))('crop');
-  const condition = state => {
-    return unitHasAp(agent.id)(state) && getItemByXYAndType(state.items)(getAgent(state))('crop');
-  };
-  if (!condition(state)) {
+  const condition = state => getItemByXYAndType(state.items)(getAgent(state))('crop');
+  if (!shouldDisplayOrder(agent.id)(condition)(state)) {
     return null;
   }
   const handleHarvestCrop = () => {

@@ -65,13 +65,18 @@ const consumeAp = (action, state) => {
 const createBuilding = (builderId, type, state) => {
   const builder = selectItemById(builderId)(state);
   const target = getItemByXYAndType(state.items)(builder)('grass');
-  const clearedItems = removeItemById(target.id, state.items);
+  return createBuildingOn(builderId)(type)(target.id)(state);
+};
+
+const createBuildingOn = builderId => buildingType => targetId => state => {
+  const builder = selectItemById(builderId)(state);
+  const clearedItems = removeItemById(targetId, state.items);
   const building = {
     id: generateId(),
     builderId,
     x: builder.x,
     y: builder.y,
-    type,
+    type: buildingType,
     createdTurn: state.turn,
   };
   return {...state, items: [...clearedItems, building]}
@@ -156,18 +161,7 @@ export default (state, action) => {
       return createBuilding(payload.agentId, 'planted', consumeAp(action, state));
     }
     case 'HARVEST_CROP': {
-      const consumedState = consumeAp(action, state);
-      const {x, y} = selectItemById(payload.targetId)(state);
-      const grass = {
-        id: generateId(),
-        x,
-        y,
-        type: 'grass',
-      };
-      return {
-        ...consumedState,
-        items: [...removeItemById(payload.targetId, consumedState.items), grass],
-      }
+      return createBuildingOn(payload.agentId)('grass')(payload.targetId)(consumeAp(action, state));
     }
     case 'TRAIN_EVENT': {
       const {agentId, event} = payload;

@@ -73,7 +73,8 @@ function FinishTrainEventButton() {
 
 function EventCard({event}) {
   const {state} = useContext(ReducerDispatch);
-  const {x, y, type} = (event.itemId ? selectItemById(event.itemId)(state) : {});
+  // TODO check item connected to event  still exists
+  const {x, y, type} = (event.itemId ? selectItemById(event.itemId)(state) || {} : {});
   return (
     <Card>
       <CardContent>
