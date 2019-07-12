@@ -4,7 +4,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import {getEnemyItems, getItemByXYAndType, getItemsByPlayer} from "./itemsUtil";
 import {ReducerDispatch} from "./App";
-import {selectEvents, selectItemById, selectSelectedItem} from "./reducer";
+import {selectItemById, selectSelectedItem} from "./reducer";
 
 //TODO replace id with getAgent
 const unitHasAp = id => state => {
@@ -115,51 +115,35 @@ function MoveToGrassButton() {
   return (<Button color={color} onClick={handleMoveToGrass}>Move To Grass</Button>);
 }
 
-function MoveToEventsButton() {
-  const {state} = useContext(ReducerDispatch);
-  let events = selectEvents(state);
-  const agent = selectSelectedItem(state);
-  if (agent && agent.training && !events.some(event => event.type === agent.behaviorTraining.event.type)) {
-    events.push(agent.behaviorTraining.event);
-  }
-  events = events.filter(event => event.itemId !== undefined);
-  if (!events) {
-    return null;
-  }
-  return events.map(event => <MoveToEventButton key={event.itemId} event={event}/>);
-}
-
 const getCurrentEvent = getAgent => state => {
   const {currentEvent} = getAgent(state);
   return selectItemById(currentEvent.itemId)(state);
 };
 
-const handleMoveToEvent = getAgent => event => condition => dispatch => () => {
-  dispatch({type: 'SET_ACTIVE_EVENT', payload: {getAgent, event}});
+const handleMoveToEvent = getAgent => condition => dispatch => () => {
   handleMove(getAgent)(getCurrentEvent(getAgent))(condition)(dispatch)();
 };
 
-// TODO move to currentEvent (set current event then move)
-function MoveToEventButton({event}) {
+const moveEventCondition = getAgent => state => {
+  const getTarget = getCurrentEvent(getAgent);
+  return getTarget(state) && moveCondition(getTarget)(getAgent)(state);
+};
+
+function MoveToEventButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
   const getAgent = selectItemById(state.selectedId);
-  const getTarget = selectItemById(event.itemId);
-  const condition = moveCondition(getTarget)(getAgent);
+  const condition = moveEventCondition(getAgent);
   if (!shouldDisplayOrder(state.selectedId)(condition)(state)) {
     return null;
   }
   const color = getButtonColor('MOVE', state);
-  //TODO event orders should only be displayed with an active event. They should assume this is
-  // done before
-  const getCurrentEventTarget = getCurrentEvent(getAgent);
-  const handleMoveToEventClick = handleMoveToEvent(getAgent)(event)(moveCondition(getCurrentEventTarget)(getAgent))(dispatch);
+  const handleMoveToEventClick = handleMoveToEvent(getAgent)(condition)(dispatch);
   return (
-    <Button color={color} onClick={handleMoveToEventClick}>Move To Event {event.type} </Button>);
+    <Button color={color} onClick={handleMoveToEventClick}>Move To Event </Button>);
 }
 
 function BuildFarmButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
-
   const agent = selectSelectedItem(state);
   const getAgent = selectItemById(agent.id);
   const condition = state => {
@@ -232,7 +216,7 @@ export default function Orders() {
           getEnemyItems(state).map((enemy) => <AttackButton key={enemy.id} targetId={enemy.id}/>)
         }
         <MoveToGrassButton/>
-        <MoveToEventsButton/>
+        <MoveToEventButton/>
         <BuildFarmButton/>
         <PlantCropButton/>
         <HarvestCropButton/>

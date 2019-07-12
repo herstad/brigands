@@ -62,6 +62,13 @@ function TrainEventButton({event}) {
   }
   const handleTrainEvent = () => {
     dispatch({
+      type: 'SET_ACTIVE_EVENT',
+      payload: {
+        event,
+        getAgent: selectItemById(agent.id)
+      }
+    });
+    dispatch({
       type: 'TRAIN_EVENT',
       payload: {
         agentId: agent.id,
@@ -109,8 +116,11 @@ function EventCard({event}) {
 }
 
 function EventsInfo() {
-  const {events} = useContext(ReducerDispatch).state;
-  return events.map((event, index) => <EventCard key={"event" + index} event={event}/>);
+  const {state} = useContext(ReducerDispatch);
+  const {events} = state;
+  const selectedUnit = selectSelectedItem(state);
+  const newEvents = selectedUnit.currentEvent ? [selectedUnit.currentEvent, ...events] : events;
+  return newEvents.map((event, index) => <EventCard key={"event" + index} event={event}/>);
 }
 
 export default function InfoPane() {

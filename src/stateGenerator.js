@@ -42,6 +42,7 @@ const generateItems = (size = 10) => {
       behaviorName: 'farmer',
       conditionalActions: [],
       events: [],
+      currentEvent: {type: 'DEFAULT_EVENT'},
     },
     {
       id: generateId(),
@@ -52,6 +53,7 @@ const generateItems = (size = 10) => {
       behaviorName: 'farmer',
       conditionalActions: [],
       events: [],
+      currentEvent: {type: 'DEFAULT_EVENT'},
     },
   ];
 
