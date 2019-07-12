@@ -89,11 +89,19 @@ const hasBehaviorForEvent = item => event => state => {
   return !!behavior.length;
 };
 
-export default (state, action) => {
+// TODO remove original
+const getNextAction = state => conditionalActions => conditionalActions.find(conditionalAction => conditionalAction.condition(state));
+
+const setUnitBehaviorAction = getAgent => ({
+  type: 'SET_UNIT_BEHAVIOR',
+  payload: {
+    getAgent,
+  }
+});
+
+export default function reducer(state, action) {
   console.log('Action');
   console.log(action);
-  console.log('State');
-  console.log(state);
   const {payload} = action;
   switch (action.type) {
     case 'END_TURN': {
@@ -126,6 +134,13 @@ export default (state, action) => {
         winner: getWinner(state),
         events,
       };
+    }
+    case 'AUTO_ACTION': {
+      const {getAgent} = payload;
+      const agent = getAgent(state);
+      console.log(agent);
+      const nextAction = getNextAction(state)(agent.conditionalActions);
+      return nextAction ? reducer(state, nextAction.action) : reducer(state, setUnitBehaviorAction(getAgent));
     }
     case 'RESTART': {
       const behaviors = state.behaviors;
@@ -161,7 +176,9 @@ export default (state, action) => {
       return createBuilding(payload.agentId, 'planted', consumeAp(action, state));
     }
     case 'HARVEST_CROP': {
-      return createBuildingOn(payload.agentId)('grass')(payload.targetId)(consumeAp(action, state));
+      const agent = payload.getAgent(state);
+      const target = getItemByXYAndType(state.items)(agent)('crop');
+      return createBuildingOn(agent.id)('grass')(target.id)(consumeAp(action, state));
     }
     case 'TRAIN_EVENT': {
       const {agentId, event} = payload;
@@ -196,12 +213,26 @@ export default (state, action) => {
       }, updatedBehaviorState);
 
     }
+    case 'SET_ACTIVE_EVENT' : {
+      //TOOD rename currentEvent to activeEvent
+      const {event, getAgent} = payload;
+      const agent = getAgent(state);
+
+      return updateItemById({...agent, currentEvent: event}, state);
+    }
     case 'SET_UNIT_BEHAVIOR': {
+      //TODO call SET_ACTIVE_EVENT or refactor
       const agent = payload.getAgent(state);
-      const conditionalActions = selectEventBehavior(agent.behaviorName)(payload.eventType)(state);
-      console.log('Updated actions for event: ' + payload.eventType);
-      console.log(conditionalActions);
-      return updateItemById({...agent, conditionalActions: [...conditionalActions]}, state);
+      const currentEvent = agent.events.length > 0 ? agent.events[0] : {type: 'DEFAULT_EVENT'};
+      console.log(currentEvent);
+      const conditionalActions = selectEventBehavior(agent.behaviorName)(currentEvent.type)(state);
+      console.log('Updated actions for event: ' + currentEvent.type);
+      return updateItemById({
+        ...agent,
+        currentEvent,
+        events: agent.events.slice(1),
+        conditionalActions: [...conditionalActions]
+      }, state);
     }
     default:
       return state;

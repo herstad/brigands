@@ -1,4 +1,5 @@
-export const PLAYERS = ['human', 'ai'];
+export const PLAYERS = ['human']; // TODO readd ai bug where ai shares behavior and consumes ap
+// export const PLAYERS =  ['human', 'ai'];
 
 export const generateState = () => {
   console.log("generate state");

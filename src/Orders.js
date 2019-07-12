@@ -20,63 +20,29 @@ const getButtonColor = (type, state) => isSelectedAction(type, state) ? 'primary
 
 const playerItemsWithAp = (playerId) => (items) => {
   return getItemsByPlayer(playerId, items)
-    .filter(item => item.ap);
+    .filter(item => item.ap > 0);
 };
 
 const getNextAction = state => conditionalActions => conditionalActions.find((conditionalAction) => conditionalAction.condition(state));
-
-const setDefaultAction = item => ({
-  type: 'SET_UNIT_BEHAVIOR',
-  payload: {
-    getAgent: selectItemById(item.id),
-    eventType: 'DEFAULT_EVENT',
-  }
-});
-
-const getNextActions = (state) => (items) => {
-  return items.map((item) => getNextAction(state)(item.conditionalActions) || ({
-    condition: () => true,
-    action: setDefaultAction(item)
-  }));
-};
-
-const getItemsWithoutActions = state => items => {
-  return items.filter(item => !getNextAction(state)(item.conditionalActions))
-};
 
 const isSelectedAction = (type, state) => {
   const conditionalAction = getNextAction(state)(selectSelectedItem(state).conditionalActions);
   return conditionalAction && type === conditionalAction.action.type;
 };
 
-const setNextBehavior = playerId => state => {
-  const {items, events} = state;
-  const conditionalActions = getItemsWithoutActions(state)(playerItemsWithAp(playerId)(items)).map(item => ({
-    type: 'SET_UNIT_BEHAVIOR',
-    payload: {
-      getAgent: selectItemById(item.id),
-      eventType: 'DEFAULT_EVENT',
-    }
-  }));
-  return [];
-};
-
-const dispatchConditionalActions = conditionalActions => dispatch => state => {
-  return conditionalActions.filter(conditionalAction => conditionalAction.condition(state))
-    .forEach(conditionalAction => dispatch(conditionalAction.action));
-};
-
 function TurnButton() {
-
-
   const {state, dispatch} = useContext(ReducerDispatch);
   const {items, activePlayerId} = state;
   const handleEndTurn = (playerId) => () => {
-    // TODO make nicer
-
-
-    const conditionalActions = getNextActions(state)(playerItemsWithAp(playerId)(items));
-    dispatchConditionalActions(conditionalActions)(dispatch)(state);
+    const playerItems = playerItemsWithAp(playerId)(items);
+    playerItems.forEach(playerItem => {
+      dispatch({
+        type: 'AUTO_ACTION',
+        payload: {
+          getAgent: selectItemById(playerItem.id)
+        }
+      });
+    });
     dispatch({
       type: 'END_TURN',
       payload: playerId
@@ -163,6 +129,17 @@ function MoveToEventsButton() {
   return events.map(event => <MoveToEventButton key={event.itemId} event={event}/>);
 }
 
+const getCurrentEvent = getAgent => state => {
+  const {currentEvent} = getAgent(state);
+  return selectItemById(currentEvent.itemId)(state);
+};
+
+const handleMoveToEvent = getAgent => event => condition => dispatch => () => {
+  dispatch({type: 'SET_ACTIVE_EVENT', payload: {getAgent, event}});
+  handleMove(getAgent)(getCurrentEvent(getAgent))(condition)(dispatch)();
+};
+
+// TODO move to currentEvent (set current event then move)
 function MoveToEventButton({event}) {
   const {state, dispatch} = useContext(ReducerDispatch);
   const getAgent = selectItemById(state.selectedId);
@@ -172,8 +149,12 @@ function MoveToEventButton({event}) {
     return null;
   }
   const color = getButtonColor('MOVE', state);
-  const handleMoveToEvent = handleMove(getAgent)(getTarget)(condition)(dispatch);
-  return (<Button color={color} onClick={handleMoveToEvent}>Move To Event {event.type} </Button>);
+  //TODO event orders should only be displayed with an active event. They should assume this is
+  // done before
+  const getCurrentEventTarget = getCurrentEvent(getAgent);
+  const handleMoveToEventClick = handleMoveToEvent(getAgent)(event)(moveCondition(getCurrentEventTarget)(getAgent))(dispatch);
+  return (
+    <Button color={color} onClick={handleMoveToEventClick}>Move To Event {event.type} </Button>);
 }
 
 function BuildFarmButton() {
@@ -225,8 +206,6 @@ function HarvestCropButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
   const agent = selectSelectedItem(state);
   const getAgent = selectItemById(agent.id);
-  //TODO duplicate
-  const target = getItemByXYAndType(state.items)(getAgent(state))('crop');
   const condition = state => getItemByXYAndType(state.items)(getAgent(state))('crop');
   if (!shouldDisplayOrder(agent.id)(condition)(state)) {
     return null;
@@ -235,8 +214,7 @@ function HarvestCropButton() {
     dispatch({
       type: 'HARVEST_CROP',
       payload: {
-        agentId: agent.id,
-        targetId: target.id,
+        getAgent,
         condition,
       }
     })
