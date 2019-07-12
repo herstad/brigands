@@ -115,17 +115,17 @@ function MoveToGrassButton() {
   return (<Button color={color} onClick={handleMoveToGrass}>Move To Grass</Button>);
 }
 
-const getCurrentEvent = getAgent => state => {
-  const {currentEvent} = getAgent(state);
-  return selectItemById(currentEvent.itemId)(state);
+const getActiveEvent = getAgent => state => {
+  const {activeEvent} = getAgent(state);
+  return selectItemById(activeEvent.itemId)(state);
 };
 
 const handleMoveToEvent = getAgent => condition => dispatch => () => {
-  handleMove(getAgent)(getCurrentEvent(getAgent))(condition)(dispatch)();
+  handleMove(getAgent)(getActiveEvent(getAgent))(condition)(dispatch)();
 };
 
 const moveEventCondition = getAgent => state => {
-  const getTarget = getCurrentEvent(getAgent);
+  const getTarget = getActiveEvent(getAgent);
   return getTarget(state) && moveCondition(getTarget)(getAgent)(state);
 };
 

@@ -215,22 +215,19 @@ export default function reducer(state, action) {
 
     }
     case 'SET_ACTIVE_EVENT' : {
-      //TOOD rename currentEvent to activeEvent
       const {event, getAgent} = payload;
       const agent = getAgent(state);
-
-      return updateItemById({...agent, currentEvent: event}, state);
+      return updateItemById({...agent, activeEvent: event}, state);
     }
     case 'SET_UNIT_BEHAVIOR': {
       //TODO call SET_ACTIVE_EVENT or refactor
       const agent = payload.getAgent(state);
-      const currentEvent = agent.events.length > 0 ? agent.events[0] : {type: 'DEFAULT_EVENT'};
-      console.log(currentEvent);
-      const conditionalActions = selectEventBehavior(agent.behaviorName)(currentEvent.type)(state);
-      console.log('Updated actions for event: ' + currentEvent.type);
+      const activeEvent = agent.events.length > 0 ? agent.events[0] : {type: 'DEFAULT_EVENT'};
+      const conditionalActions = selectEventBehavior(agent.behaviorName)(activeEvent.type)(state);
+      console.log('Updated actions for event: ' + activeEvent.type);
       return updateItemById({
         ...agent,
-        currentEvent,
+        activeEvent,
         events: agent.events.slice(1),
         conditionalActions: [...conditionalActions]
       }, state);

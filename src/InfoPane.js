@@ -39,7 +39,7 @@ function SelectEventButton({event}) {
   const {state, dispatch} = useContext(ReducerDispatch);
   const getAgent = selectSelectedItem;
   const agent = getAgent(state);
-  if (agent === undefined || agent.currentEvent === event) {
+  if (agent === undefined || agent.activeEvent === event) {
     return null;
   }
   const handleSelectEvent = () => {
@@ -119,7 +119,7 @@ function EventsInfo() {
   const {state} = useContext(ReducerDispatch);
   const {events} = state;
   const selectedUnit = selectSelectedItem(state);
-  const newEvents = selectedUnit.currentEvent ? [selectedUnit.currentEvent, ...events] : events;
+  const newEvents = selectedUnit.activeEvent ? [selectedUnit.activeEvent, ...events] : events;
   return newEvents.map((event, index) => <EventCard key={"event" + index} event={event}/>);
 }
 
