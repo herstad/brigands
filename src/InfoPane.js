@@ -35,6 +35,25 @@ function UnitCard() {
   );
 }
 
+function SelectEventButton({event}) {
+  const {state, dispatch} = useContext(ReducerDispatch);
+  const getAgent = selectSelectedItem;
+  const agent = getAgent(state);
+  if (agent === undefined || agent.currentEvent === event) {
+    return null;
+  }
+  const handleSelectEvent = () => {
+    dispatch({
+      type: 'SET_ACTIVE_EVENT',
+      payload: {
+        getAgent,
+        event,
+      }
+    })
+  };
+  return (<Button color='default' onClick={handleSelectEvent}>Select event {event.type}</Button>);
+}
+
 function TrainEventButton({event}) {
   const {state, dispatch} = useContext(ReducerDispatch);
   const agent = selectSelectedItem(state);
@@ -82,6 +101,7 @@ function EventCard({event}) {
         <Typography>x:{x}</Typography>
         <Typography>y:{y}</Typography>
         <Typography>itemType:{type}</Typography>
+        <SelectEventButton event={event}/>
         <TrainEventButton event={event}/>
       </CardContent>
     </Card>
