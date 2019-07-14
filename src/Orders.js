@@ -106,16 +106,10 @@ const handleMove = getAgent => getTarget => condition => dispatch => () => {
 };
 
 function MoveToGrassButton() {
-  const {state, dispatch} = useContext(ReducerDispatch);
+  const {state} = useContext(ReducerDispatch);
   const getAgent = selectItemById(state.selectedId);
   const getTarget = targetClosestType(getAgent)('grass');
-  const condition = moveCondition(getTarget)(getAgent);
-  if (!shouldDisplayOrder(state.selectedId)(condition)(state)) {
-    return null;
-  }
-  const color = getButtonColor('MOVE', state);
-  const handleMoveToGrass = handleMove(getAgent)(getTarget)(condition)(dispatch);
-  return (<Button color={color} onClick={handleMoveToGrass}>Move To Grass</Button>);
+  return (<MoveButton getTarget={getTarget} targetName={'Grass'}/>);
 }
 
 const getActiveEvent = getAgent => state => {
@@ -123,39 +117,30 @@ const getActiveEvent = getAgent => state => {
   return selectItemById(activeEvent.itemId)(state);
 };
 
-const handleMoveToEvent = getAgent => condition => dispatch => () => {
-  handleMove(getAgent)(getActiveEvent(getAgent))(condition)(dispatch)();
-};
-
-const moveEventCondition = getAgent => state => {
-  const getTarget = getActiveEvent(getAgent);
-  return getTarget(state) && moveCondition(getTarget)(getAgent)(state);
-};
-
 function MoveToEventButton() {
-  const {state, dispatch} = useContext(ReducerDispatch);
+  const {state} = useContext(ReducerDispatch);
   const getAgent = selectItemById(state.selectedId);
-  const condition = moveEventCondition(getAgent);
-  if (!shouldDisplayOrder(state.selectedId)(condition)(state)) {
-    return null;
-  }
-  const color = getButtonColor('MOVE', state);
-  const handleMoveToEventClick = handleMoveToEvent(getAgent)(condition)(dispatch);
-  return (
-    <Button color={color} onClick={handleMoveToEventClick}>Move To Event </Button>);
+  const getTarget = getActiveEvent(getAgent);
+  return (<MoveButton getTarget={getTarget} targetName={'Event'}/>);
 }
 
 function MoveToHomeButton() {
-  const {state, dispatch} = useContext(ReducerDispatch);
+  const {state} = useContext(ReducerDispatch);
   const getAgent = selectItemById(state.selectedId);
   const getTarget = targetHome(getAgent);
+  return (<MoveButton getTarget={getTarget} targetName={'Home'}/>);
+}
+
+function MoveButton({getTarget, targetName,}) {
+  const {state, dispatch} = useContext(ReducerDispatch);
+  const getAgent = selectItemById(state.selectedId);
   const condition = moveCondition(getTarget)(getAgent);
   if (!shouldDisplayOrder(state.selectedId)(condition)(state)) {
     return null;
   }
   const color = getButtonColor('MOVE', state);
-  const handleMoveToHome = handleMove(getAgent)(getTarget)(condition)(dispatch);
-  return (<Button color={color} onClick={handleMoveToHome}>Move To Home</Button>);
+  const handleMoveClick = handleMove(getAgent)(getTarget)(condition)(dispatch);
+  return (<Button color={color} onClick={handleMoveClick}>Move To {targetName}</Button>);
 }
 
 function BuildFarmButton() {
