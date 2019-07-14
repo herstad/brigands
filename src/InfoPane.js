@@ -13,7 +13,7 @@ function UnitCard() {
   if (selected === undefined) {
     return null;
   }
-  const {id, playerId, x, y, hp, ap, type} = selected;
+  const {id, playerId, x, y, hp, ap, type, resources} = selected;
   const maxHp = 5;
   const relativeHp = hp / maxHp * 100;
   const defaultEvent = {type: 'DEFAULT_EVENT', itemId: selected.id};
@@ -27,6 +27,7 @@ function UnitCard() {
         <Typography>hp:{hp}</Typography>
         <Typography>ap:{ap}</Typography>
         <Typography>type:{type}</Typography>
+        <Typography>resource: {resources} </Typography>
         <LinearProgress variant="determinate" value={relativeHp}/>
         <TrainEventButton event={defaultEvent}/>
         <FinishTrainEventButton/>

@@ -179,7 +179,11 @@ export default function reducer(state, action) {
     case 'HARVEST_CROP': {
       const agent = payload.getAgent(state);
       const target = getItemByXYAndType(state.items)(agent)('crop');
-      return createBuildingOn(agent.id)('grass')(target.id)(consumeAp(action, state));
+      const addedResourceState = updateItemById({
+        ...agent,
+        resources: [...agent.resources, 'crop']
+      }, state);
+      return createBuildingOn(agent.id)('grass')(target.id)(consumeAp(action, addedResourceState));
     }
     case 'TRAIN_EVENT': {
       const {agentId, event} = payload;

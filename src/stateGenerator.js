@@ -43,6 +43,7 @@ const generateItems = (size = 10) => {
       conditionalActions: [],
       events: [],
       activeEvent: {type: 'DEFAULT_EVENT'},
+      resources: [],
     },
     {
       id: generateId(),
@@ -54,6 +55,7 @@ const generateItems = (size = 10) => {
       conditionalActions: [],
       events: [],
       activeEvent: {type: 'DEFAULT_EVENT'},
+      resources: [],
     },
   ];
 
