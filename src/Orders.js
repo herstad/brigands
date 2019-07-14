@@ -91,6 +91,9 @@ const compareDistance = agent => (firstEl, secondEl) => {
 };
 const targetClosestType = getAgent => type => state => state.items.filter(item => item.type === type).sort(compareDistance(getAgent(state)))[0];
 
+//TODO separate item type and if it is a home. hardcoding 'farm' as that is the only home type
+const targetHome = getAgent => state => state.items.filter(item => item.type === 'farm' && item.builderId === getAgent(state).id)[0];
+
 const handleMove = getAgent => getTarget => condition => dispatch => () => {
   dispatch({
     type: 'MOVE',
@@ -140,6 +143,19 @@ function MoveToEventButton() {
   const handleMoveToEventClick = handleMoveToEvent(getAgent)(condition)(dispatch);
   return (
     <Button color={color} onClick={handleMoveToEventClick}>Move To Event </Button>);
+}
+
+function MoveToHomeButton() {
+  const {state, dispatch} = useContext(ReducerDispatch);
+  const getAgent = selectItemById(state.selectedId);
+  const getTarget = targetHome(getAgent);
+  const condition = moveCondition(getTarget)(getAgent);
+  if (!shouldDisplayOrder(state.selectedId)(condition)(state)) {
+    return null;
+  }
+  const color = getButtonColor('MOVE', state);
+  const handleMoveToHome = handleMove(getAgent)(getTarget)(condition)(dispatch);
+  return (<Button color={color} onClick={handleMoveToHome}>Move To Home</Button>);
 }
 
 function BuildFarmButton() {
@@ -217,6 +233,7 @@ export default function Orders() {
         }
         <MoveToGrassButton/>
         <MoveToEventButton/>
+        <MoveToHomeButton/>
         <BuildFarmButton/>
         <PlantCropButton/>
         <HarvestCropButton/>
