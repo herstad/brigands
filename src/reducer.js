@@ -140,8 +140,8 @@ export default function reducer(state, action) {
       const agent = getAgent(state);
       console.log(agent);
       const nextAction = getNextAction(state)(agent.conditionalActions);
-      //TODO call next action after setting next behavior
-      return nextAction ? reducer(state, nextAction.action) : reducer(state, setUnitBehaviorAction(getAgent));
+      //TODO unclear order of execution.
+      return nextAction ? reducer(state, nextAction.action) : reducer(reducer(state, setUnitBehaviorAction(getAgent)), action);
     }
     case 'RESTART': {
       const behaviors = state.behaviors;
