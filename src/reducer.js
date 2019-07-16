@@ -78,6 +78,7 @@ const createBuildingOn = builderId => buildingType => targetId => state => {
     y: builder.y,
     type: buildingType,
     createdTurn: state.turn,
+    resources: [],
   };
   return {...state, items: [...clearedItems, building]}
 };
@@ -184,6 +185,14 @@ export default function reducer(state, action) {
         resources: [...agent.resources, 'crop']
       }, state);
       return createBuildingOn(agent.id)('grass')(target.id)(consumeAp(action, addedResourceState));
+    }
+    case 'UNLOAD_RESOURCE': {
+      const agent = payload.getAgent(state);
+      //TODO hardcoded farm as that is the only home type
+      const target = getItemByXYAndType(state.items)(agent)('farm');
+      const updatedTarget = {...target, resources: [...target.resources, agent.resources[0]]};
+      const updatedAgent = {...agent, resources: agent.resources.slice(1)};
+      return updateItemById(updatedTarget, updateItemById(updatedAgent, consumeAp(action, state)));
     }
     case 'TRAIN_EVENT': {
       const {agentId, event} = payload;

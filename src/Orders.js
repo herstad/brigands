@@ -207,6 +207,30 @@ function HarvestCropButton() {
   return (<Button color='default' onClick={handleHarvestCrop}>HarvestCrop</Button>);
 }
 
+const unloadResourceCondition = getAgent => state => {
+  const agent = getAgent(state);
+  return agent.resources.length > 0 && getItemByXYAndType(state.items)(agent)('farm');
+};
+
+function UnloadResourceButton() {
+  const {state, dispatch} = useContext(ReducerDispatch);
+  const getAgent = selectItemById(state.selectedId);
+  const condition = unloadResourceCondition(getAgent);
+  if (!shouldDisplayOrder(state.selectedId)(condition)(state)) {
+    return null;
+  }
+  const handleUnload = () => {
+    dispatch({
+      type: 'UNLOAD_RESOURCE',
+      payload: {
+        getAgent,
+        condition,
+      }
+    })
+  };
+  return (<Button color='default' onClick={handleUnload}>Unload Resource</Button>);
+}
+
 export default function Orders() {
   const {state} = useContext(ReducerDispatch);
   return <div>
@@ -222,6 +246,7 @@ export default function Orders() {
         <BuildFarmButton/>
         <PlantCropButton/>
         <HarvestCropButton/>
+        <UnloadResourceButton/>
       </CardContent>
     </Card>
   </div>
