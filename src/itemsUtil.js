@@ -15,6 +15,12 @@ export const getEnemyItems = (state) => {
 export const inRange = (attacker, target, range = 1) => {
   return Math.abs(target.x - attacker.x) + Math.abs(target.y - attacker.y) <= range;
 };
+
+export const updateItem = updatedItem => state => {
+  const items = state.items.map(updateItemByIdFn(updatedItem));
+  return ({...state, items});
+};
+
 export const updateItemById = (updatedItem, state) => {
   const items = state.items.map(updateItemByIdFn(updatedItem));
   return ({...state, items});

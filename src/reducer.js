@@ -7,10 +7,12 @@ import {
   isPlayer,
   removeItemById,
   replaceItems,
+  updateItem,
   updateItemById,
   updateItems
 } from "./itemsUtil";
 import {move, toward} from "./movement";
+import {pipe} from "./functional";
 
 export const selectItemById = id => state => getItemById(id, state.items);
 
@@ -53,14 +55,16 @@ const consumeAp = (action, state) => {
   if (!!selectedItem.training) {
     const conditionalAction = {action, condition};
     selectedItem.behaviorTraining.conditionalActions.push(conditionalAction);
-  } else {
+  } else if (selectedItem.conditionalActions) {
     const index = selectedItem.conditionalActions.findIndex(conditionalAction => conditionalAction.action.type === action.type);
     if (index > 0) {
       selectedItem.conditionalActions = selectedItem.conditionalActions.slice(index);
     }
   }
-  return updateItemById(selectedItem, state);
+  return updateItem(selectedItem)(state);
 };
+
+const postAction = action => state => consumeAp(action, state);
 
 const createBuilding = (builderId, type, state) => {
   const builder = selectItemById(builderId)(state);
@@ -153,23 +157,20 @@ export default function reducer(state, action) {
     }
     case 'ATTACK': {
       const {getAgent, getTarget} = payload;
-      const consumedState = consumeAp(action, state);
-      const attacker = getAgent(consumedState);
-      const target = getTarget(consumedState);
-      if (inRange(attacker, target)) {
-        console.log('target in range!');
-        return updateItemById({...target, hp: target.hp - 1}, consumedState);
-      } else {
+      const attacker = getAgent(state);
+      const target = getTarget(state);
+
+      if (!inRange(attacker, target)) {
         console.log('target not in range!');
-        return updateItemById(move(attacker, toward(target)), consumedState);
+        return state;
       }
+      const updatedTarget = {...target, hp: target.hp - 1};
+      return pipe(updateItem(updatedTarget), postAction(action))(state)
     }
     case 'MOVE': {
       const {getAgent, getTarget} = payload;
-      const consumedState = consumeAp(action, state);
-      const agent = getAgent(consumedState);
-      const target = getTarget(consumedState);
-      return updateItemById(move(agent, toward(target)), consumedState);
+      const moveAgent = (s) => updateItem(move(getAgent(s), toward(getTarget(s))))(s);
+      return pipe(moveAgent, postAction(action))(state);
     }
     case 'BUILD_FARM': {
       return createBuilding(payload.agentId, 'farm', consumeAp(action, state));
@@ -192,7 +193,9 @@ export default function reducer(state, action) {
       const target = getItemByXYAndType(state.items)(agent)('farm');
       const updatedTarget = {...target, resources: [...target.resources, agent.resources[0]]};
       const updatedAgent = {...agent, resources: agent.resources.slice(1)};
-      return updateItemById(updatedTarget, updateItemById(updatedAgent, consumeAp(action, state)));
+      return pipe(updateItem(updatedAgent), updateItem(updatedTarget), postAction(action))(state);
+      // return updateItemById(updatedTarget, updateItemById(updatedAgent, consumeAp(action,
+      // state)));
     }
     case 'TRAIN_EVENT': {
       const {agentId, event} = payload;
@@ -237,6 +240,15 @@ export default function reducer(state, action) {
       const agent = payload.getAgent(state);
       const activeEvent = agent.events.length > 0 ? agent.events[0] : {type: 'DEFAULT_EVENT'};
       const conditionalActions = selectEventBehavior(agent.behaviorName)(activeEvent.type)(state);
+
+      //TODO quickfix to stop endless recursion if there is no valid action for DEFAULT_EVENT
+      if (activeEvent.type === 'DEFAULT_EVENT' && !getNextAction(state)(conditionalActions)) {
+        return updateItem({
+          ...agent,
+          activeEvent: {type: 'SLEEPING'},
+          conditionalActions: [{action: {type: 'SLEEP', payload: {}}, condition: () => true}]
+        })(state)
+      }
       console.log('Updated actions for event: ' + activeEvent.type);
       return updateItemById({
         ...agent,
