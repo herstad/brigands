@@ -9,7 +9,7 @@ import reducer, {
 describe('reducer', () => {
   const dAgent = {id: 0, ap: 1, x: 0, y: 0, hp: 5};
   const dTarget = {id: 1, ap: 1, x: 0, y: 1, hp: 5};
-  const dState = {items: [dAgent, dTarget]};
+  const dState = {items: [dAgent, dTarget], behaviors: {}};
   const getAgent = selectItemById(dAgent.id);
   const getTarget = selectItemById(dTarget.id);
 
@@ -36,13 +36,45 @@ describe('reducer', () => {
     });
   });
   describe('AUTO_ACTION', () => {
+    const invalidId = 13;
+    const validId = 99;
+    const conditionalActionSelect = id => conditionOutcome => {
+      return {action: setSelectedItem(id), condition: () => conditionOutcome}
+    };
+
+    const validConditionalActionSelect = () => conditionalActionSelect(validId)(true);
+    const invalidConditionalActionSelect = () => conditionalActionSelect(invalidId)(false);
+
     it('should perform next action', () => {
       const agent = {
         ...dAgent,
-        conditionalActions: [{action: setSelectedItem(99), condition: () => true}]
+        conditionalActions: [
+          validConditionalActionSelect(),
+        ]
       };
       const uState = reducer({items: [agent]}, autoAction(getAgent));
-      expect(uState.selectedId).toBe(99);
+      expect(uState.selectedId).toBe(validId);
+    });
+    it('should skip invalid actions', () => {
+      const agent = {
+        ...dAgent,
+        conditionalActions: [invalidConditionalActionSelect(), validConditionalActionSelect()]
+      };
+      const uState = reducer({items: [agent]}, autoAction(getAgent));
+      expect(uState.selectedId).toBe(validId);
+    });
+    it('should set SLEEPING event on no valid actions or events', () => {
+      const agent = {
+        ...dAgent,
+        conditionalActions: [],
+        events: [],
+      };
+      const state = {...dState, items: [agent]};
+      const uState = reducer(state, autoAction(getAgent));
+      expect(uState.items[0].activeEvent.type).toBe('SLEEPING');
+    });
+    it('should perform action from next event if no valid actions', () => {
+      //TODO create behavior for DEFAULT_EVENT with validConditionalActionSelect
     });
   });
   describe('BUILD_FARM', () => {
