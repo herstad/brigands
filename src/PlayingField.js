@@ -6,6 +6,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
 import {ReducerDispatch} from "./App";
+import {setSelectedItem} from "./reducer";
 
 const typeIcons = {
   o: 'android',
@@ -42,7 +43,7 @@ const createAtPosition = (items = [], x, y) => {
 function PlayingFieldCell({elem}) {
   const {dispatch} = useContext(ReducerDispatch);
   const handleSetSelected = (id) => () => {
-    dispatch({type: 'SET_SELECTED', payload: id});
+    dispatch(setSelectedItem(id));
   };
   return (
     <TableCell>

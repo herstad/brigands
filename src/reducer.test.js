@@ -1,4 +1,10 @@
-import reducer, {ATTACK, selectItemById, SET_SELECTED} from "./reducer";
+import reducer, {
+  ATTACK,
+  autoAction,
+  selectItemById,
+  SET_SELECTED,
+  setSelectedItem
+} from "./reducer";
 
 describe('reducer', () => {
   const dAgent = {id: 0, ap: 1, x: 0, y: 0, hp: 5};
@@ -29,12 +35,43 @@ describe('reducer', () => {
       expect(uTarget.hp).toBe(5);
     });
   });
-
+  describe('AUTO_ACTION', () => {
+    it('should perform next action', () => {
+      const agent = {
+        ...dAgent,
+        conditionalActions: [{action: setSelectedItem(99), condition: () => true}]
+      };
+      const uState = reducer({items: [agent]}, autoAction(getAgent));
+      expect(uState.selectedId).toBe(99);
+    });
+  });
+  describe('BUILD_FARM', () => {
+  });
+  describe('END_TURN', () => {
+  });
+  describe('FINISH_TRAIN_EVENT', () => {
+  });
+  describe('HARVEST_CROP', () => {
+  });
+  describe('MOVE', () => {
+  });
+  describe('PLANT_CROP', () => {
+  });
+  describe('RESTART', () => {
+  });
+  describe('SET_ACTIVE_EVENT', () => {
+  });
   describe('SET_SELECTED', () => {
     it('should set selected', () => {
-      const uState = reducer(dState, {type: SET_SELECTED, payload: 99});
+      const uState = reducer(dState, setSelectedItem(99));
       expect(uState.selectedId).toBe(99)
     });
+  });
+  describe('SET_UNIT_BEHAVIOR', () => {
+  });
+  describe('TRAIN_EVENT', () => {
+  });
+  describe('UNLOAD_RESOURCE', () => {
   });
 
 });

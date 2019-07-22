@@ -120,6 +120,15 @@ const setUnitBehaviorAction = getAgent => ({
   }
 });
 
+export const autoAction = getAgent => ({
+  type: AUTO_ACTION,
+  payload: {
+    getAgent,
+  }
+});
+
+export const setSelectedItem = id => ({type: SET_SELECTED, payload: id});
+
 export default function reducer(state, action) {
   console.log('Action');
   console.log(action);
