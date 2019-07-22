@@ -14,6 +14,22 @@ import {
 import {move, toward} from "./movement";
 import {pipe} from "./functional";
 
+export const ATTACK = 'ATTACK';
+export const AUTO_ACTION = 'AUTO_ACTION';
+export const BUILD_FARM = 'BUILD_FARM';
+export const END_TURN = 'END_TURN';
+export const FINISH_TRAIN_EVENT = 'FINISH_TRAIN_EVENT';
+export const HARVEST_CROP = 'HARVEST_CROP';
+export const MOVE = 'MOVE';
+export const PLANT_CROP = 'PLANT_CROP';
+export const RESTART = 'RESTART';
+export const SET_ACTIVE_EVENT = 'SET_ACTIVE_EVENT';
+export const SET_SELECTED = 'SET_SELECTED';
+export const SET_UNIT_BEHAVIOR = 'SET_UNIT_BEHAVIOR';
+export const TRAIN_EVENT = 'TRAIN_EVENT';
+export const UNLOAD_RESOURCE = 'UNLOAD_RESOURCE';
+
+
 export const selectItemById = id => state => getItemById(id, state.items);
 
 export const selectSelectedItem = (state) => getItemById(state.selectedId, state.items);
@@ -140,7 +156,7 @@ export default function reducer(state, action) {
         events,
       };
     }
-    case 'AUTO_ACTION': {
+    case AUTO_ACTION: {
       const {getAgent} = payload;
       const agent = getAgent(state);
       console.log(agent);
@@ -148,14 +164,14 @@ export default function reducer(state, action) {
       //TODO unclear order of execution.
       return nextAction ? reducer(state, nextAction.action) : reducer(reducer(state, setUnitBehaviorAction(getAgent)), action);
     }
-    case 'RESTART': {
+    case RESTART: {
       const behaviors = state.behaviors;
       return {...generateState(), behaviors};
     }
-    case 'SET_SELECTED': {
+    case SET_SELECTED: {
       return {...state, selectedId: payload};
     }
-    case 'ATTACK': {
+    case ATTACK: {
       const {getAgent, getTarget} = payload;
       const attacker = getAgent(state);
       const target = getTarget(state);
@@ -167,18 +183,18 @@ export default function reducer(state, action) {
       const updatedTarget = {...target, hp: target.hp - 1};
       return pipe(updateItem(updatedTarget), postAction(action))(state)
     }
-    case 'MOVE': {
+    case MOVE: {
       const {getAgent, getTarget} = payload;
       const moveAgent = (s) => updateItem(move(getAgent(s), toward(getTarget(s))))(s);
       return pipe(moveAgent, postAction(action))(state);
     }
-    case 'BUILD_FARM': {
+    case BUILD_FARM: {
       return createBuilding(payload.agentId, 'farm', consumeAp(action, state));
     }
-    case 'PLANT_CROP': {
+    case PLANT_CROP: {
       return createBuilding(payload.agentId, 'planted', consumeAp(action, state));
     }
-    case 'HARVEST_CROP': {
+    case HARVEST_CROP: {
       const agent = payload.getAgent(state);
       const target = getItemByXYAndType(state.items)(agent)('crop');
       const addedResourceState = updateItemById({
@@ -187,7 +203,7 @@ export default function reducer(state, action) {
       }, state);
       return createBuildingOn(agent.id)('grass')(target.id)(consumeAp(action, addedResourceState));
     }
-    case 'UNLOAD_RESOURCE': {
+    case UNLOAD_RESOURCE: {
       const agent = payload.getAgent(state);
       //TODO hardcoded farm as that is the only home type
       const target = getItemByXYAndType(state.items)(agent)('farm');
@@ -197,7 +213,7 @@ export default function reducer(state, action) {
       // return updateItemById(updatedTarget, updateItemById(updatedAgent, consumeAp(action,
       // state)));
     }
-    case 'TRAIN_EVENT': {
+    case TRAIN_EVENT: {
       const {agentId, event} = payload;
       return updateItemById({
         id: agentId,
@@ -205,7 +221,7 @@ export default function reducer(state, action) {
         training: true,
       }, state);
     }
-    case 'FINISH_TRAIN_EVENT': {
+    case FINISH_TRAIN_EVENT: {
       const {agentId} = payload;
       const agent = selectItemById(agentId)(state);
       const {name, eventType, conditionalActions} = agent.behaviorTraining;
@@ -230,12 +246,12 @@ export default function reducer(state, action) {
       }, updatedBehaviorState);
 
     }
-    case 'SET_ACTIVE_EVENT' : {
+    case SET_ACTIVE_EVENT : {
       const {event, getAgent} = payload;
       const agent = getAgent(state);
       return updateItemById({...agent, activeEvent: event}, state);
     }
-    case 'SET_UNIT_BEHAVIOR': {
+    case SET_UNIT_BEHAVIOR: {
       //TODO call SET_ACTIVE_EVENT or refactor
       const agent = payload.getAgent(state);
       const activeEvent = agent.events.length > 0 ? agent.events[0] : {type: 'DEFAULT_EVENT'};

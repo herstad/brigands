@@ -5,7 +5,13 @@ import Typography from '@material-ui/core/Typography';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import {ReducerDispatch} from "./App";
 import Button from "@material-ui/core/Button";
-import {selectItemById, selectSelectedItem} from "./reducer";
+import {
+  FINISH_TRAIN_EVENT,
+  selectItemById,
+  selectSelectedItem,
+  SET_ACTIVE_EVENT,
+  TRAIN_EVENT
+} from "./reducer";
 
 function UnitCard() {
   const {state} = useContext(ReducerDispatch);
@@ -45,7 +51,7 @@ function SelectEventButton({event}) {
   }
   const handleSelectEvent = () => {
     dispatch({
-      type: 'SET_ACTIVE_EVENT',
+      type: SET_ACTIVE_EVENT,
       payload: {
         getAgent,
         event,
@@ -63,14 +69,14 @@ function TrainEventButton({event}) {
   }
   const handleTrainEvent = () => {
     dispatch({
-      type: 'SET_ACTIVE_EVENT',
+      type: SET_ACTIVE_EVENT,
       payload: {
         event,
         getAgent: selectItemById(agent.id)
       }
     });
     dispatch({
-      type: 'TRAIN_EVENT',
+      type: TRAIN_EVENT,
       payload: {
         agentId: agent.id,
         event,
@@ -88,7 +94,7 @@ function FinishTrainEventButton() {
   }
   const handleTrainEvent = () => {
     dispatch({
-      type: 'FINISH_TRAIN_EVENT',
+      type: FINISH_TRAIN_EVENT,
       payload: {
         agentId: agent.id,
       }

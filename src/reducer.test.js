@@ -1,4 +1,4 @@
-import reducer, {selectItemById} from "./reducer";
+import reducer, {ATTACK, selectItemById, SET_SELECTED} from "./reducer";
 
 describe('reducer', () => {
   const dAgent = {id: 0, ap: 1, x: 0, y: 0, hp: 5};
@@ -14,7 +14,7 @@ describe('reducer', () => {
 
   describe('ATTACK', () => {
     it('should reduce hp of target', () => {
-      const uState = reducer(dState, {type: 'ATTACK', payload: {getAgent, getTarget}});
+      const uState = reducer(dState, {type: ATTACK, payload: {getAgent, getTarget}});
       const uAgent = getAgent(uState);
       const uTarget = getTarget(uState);
       expect(uAgent.ap).toBe(0);
@@ -22,7 +22,7 @@ describe('reducer', () => {
     });
     it('should do nothing if target not in range', () => {
       const state = {items: [dAgent, {...dTarget, y: 2}]};
-      const uState = reducer(state, {type: 'ATTACK', payload: {getAgent, getTarget}});
+      const uState = reducer(state, {type: ATTACK, payload: {getAgent, getTarget}});
       const uAgent = getAgent(uState);
       const uTarget = getTarget(uState);
       expect(uAgent.ap).toBe(1);
@@ -32,7 +32,7 @@ describe('reducer', () => {
 
   describe('SET_SELECTED', () => {
     it('should set selected', () => {
-      const uState = reducer(dState, {type: 'SET_SELECTED', payload: 99});
+      const uState = reducer(dState, {type: SET_SELECTED, payload: 99});
       expect(uState.selectedId).toBe(99)
     });
   });

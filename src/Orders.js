@@ -4,7 +4,18 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import {getEnemyItems, getItemByXYAndType, getItemsByPlayer} from "./itemsUtil";
 import {ReducerDispatch} from "./App";
-import {selectItemById, selectSelectedItem} from "./reducer";
+import {
+  ATTACK,
+  AUTO_ACTION,
+  BUILD_FARM,
+  END_TURN,
+  HARVEST_CROP,
+  MOVE,
+  PLANT_CROP,
+  selectItemById,
+  selectSelectedItem,
+  UNLOAD_RESOURCE
+} from "./reducer";
 
 //TODO replace id with getAgent
 const unitHasAp = id => state => {
@@ -37,14 +48,14 @@ function TurnButton() {
     const playerItems = playerItemsWithAp(playerId)(items);
     playerItems.forEach(playerItem => {
       dispatch({
-        type: 'AUTO_ACTION',
+        type: AUTO_ACTION,
         payload: {
           getAgent: selectItemById(playerItem.id)
         }
       });
     });
     dispatch({
-      type: 'END_TURN',
+      type: END_TURN,
       payload: playerId
     })
   };
@@ -66,7 +77,7 @@ function AttackButton({targetId}) {
   const color = getButtonColor('ATTACK', state);
   const handleAttack = () => {
     dispatch({
-      type: 'ATTACK',
+      type: ATTACK,
       payload: {
         getAgent,
         getTarget,
@@ -96,7 +107,7 @@ const targetHome = getAgent => state => state.items.filter(item => item.type ===
 
 const handleMove = getAgent => getTarget => condition => dispatch => () => {
   dispatch({
-    type: 'MOVE',
+    type: MOVE,
     payload: {
       getAgent,
       getTarget,
@@ -155,7 +166,7 @@ function BuildFarmButton() {
   }
   const handleBuildFarm = () => {
     dispatch({
-      type: 'BUILD_FARM',
+      type: BUILD_FARM,
       payload: {
         agentId: agent.id,
         condition,
@@ -177,7 +188,7 @@ function PlantCropButton() {
   }
   const handlePlantCrop = () => {
     dispatch({
-      type: 'PLANT_CROP',
+      type: PLANT_CROP,
       payload: {
         agentId: agent.id,
         condition,
@@ -197,7 +208,7 @@ function HarvestCropButton() {
   }
   const handleHarvestCrop = () => {
     dispatch({
-      type: 'HARVEST_CROP',
+      type: HARVEST_CROP,
       payload: {
         getAgent,
         condition,
@@ -221,7 +232,7 @@ function UnloadResourceButton() {
   }
   const handleUnload = () => {
     dispatch({
-      type: 'UNLOAD_RESOURCE',
+      type: UNLOAD_RESOURCE,
       payload: {
         getAgent,
         condition,
