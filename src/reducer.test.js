@@ -6,6 +6,7 @@ import reducer, {
   moveTowardTarget,
   plantCrop,
   selectItemById,
+  setActiveEvent,
   setSelectedItem,
   unloadResource
 } from "./reducer";
@@ -120,6 +121,9 @@ describe('reducer', () => {
   describe('RESTART', () => {
   });
   describe('SET_ACTIVE_EVENT', () => {
+    const event = {type: 'TEST_EVENT'};
+    const uState = reducer(dState, setActiveEvent(getAgent)(event));
+    expect(getAgent(uState)).toHaveProperty('activeEvent', event)
   });
   describe('SET_SELECTED', () => {
     it('should set selected', () => {

@@ -10,6 +10,7 @@ import {
   selectItemById,
   selectSelectedItem,
   SET_ACTIVE_EVENT,
+  setActiveEvent,
   TRAIN_EVENT
 } from "./reducer";
 
@@ -49,15 +50,7 @@ function SelectEventButton({event}) {
   if (agent === undefined || agent.activeEvent === event) {
     return null;
   }
-  const handleSelectEvent = () => {
-    dispatch({
-      type: SET_ACTIVE_EVENT,
-      payload: {
-        getAgent,
-        event,
-      }
-    })
-  };
+  const handleSelectEvent = () => dispatch(setActiveEvent(getAgent)(event));
   return (<Button color='default' onClick={handleSelectEvent}>Select event {event.type}</Button>);
 }
 

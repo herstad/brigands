@@ -168,6 +168,13 @@ export const unloadResource = getAgent => condition => ({
   }
 });
 
+export const setActiveEvent = getAgent => event => ({
+  type: SET_ACTIVE_EVENT,
+  payload: {
+    getAgent,
+    event,
+  }
+});
 
 export const setSelectedItem = id => ({type: SET_SELECTED, payload: id});
 
