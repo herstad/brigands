@@ -160,6 +160,14 @@ export const moveTowardTarget = getAgent => getTarget => condition => ({
   }
 });
 
+export const unloadResource = getAgent => condition => ({
+  type: UNLOAD_RESOURCE,
+  payload: {
+    getAgent,
+    condition,
+  }
+});
+
 
 export const setSelectedItem = id => ({type: SET_SELECTED, payload: id});
 

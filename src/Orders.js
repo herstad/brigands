@@ -14,7 +14,7 @@ import {
   plantCrop,
   selectItemById,
   selectSelectedItem,
-  UNLOAD_RESOURCE
+  unloadResource
 } from "./reducer";
 
 //TODO replace id with getAgent
@@ -194,15 +194,7 @@ function UnloadResourceButton() {
   if (!shouldDisplayOrder(state.selectedId)(condition)(state)) {
     return null;
   }
-  const handleUnload = () => {
-    dispatch({
-      type: UNLOAD_RESOURCE,
-      payload: {
-        getAgent,
-        condition,
-      }
-    })
-  };
+  const handleUnload = () => dispatch(unloadResource(getAgent)(condition));
   return (<Button color='default' onClick={handleUnload}>Unload Resource</Button>);
 }
 

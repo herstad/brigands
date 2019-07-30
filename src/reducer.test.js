@@ -6,9 +6,10 @@ import reducer, {
   moveTowardTarget,
   plantCrop,
   selectItemById,
-  setSelectedItem
+  setSelectedItem,
+  unloadResource
 } from "./reducer";
-import {findItemByType} from "./itemsUtil";
+import {findItemByType, getItemById} from "./itemsUtil";
 
 describe('reducer', () => {
   const dAgent = {id: 0, ap: 1, x: 0, y: 0, hp: 5, resources: []};
@@ -131,6 +132,24 @@ describe('reducer', () => {
   describe('TRAIN_EVENT', () => {
   });
   describe('UNLOAD_RESOURCE', () => {
+    it('should unload resource from agent to home', () => {
+      const state = {
+        ...dState,
+        items: [
+          {...dAgent, resources: ['crop']},
+          {
+            ...dAgent,
+            id: 99,
+            builderId: dAgent.id,
+            type: 'farm',
+            resources: []
+          }]
+      };
+
+      const uState = reducer(state, unloadResource(getAgent)(truthy));
+      expect(getItemById(99, uState.items)).toHaveProperty('resources', ['crop']);
+      expect(getAgent(uState)).toHaveProperty('resources', []);
+    });
   });
 
 });
