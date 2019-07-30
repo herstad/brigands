@@ -1,6 +1,7 @@
 import reducer, {
   ATTACK,
   autoAction,
+  buildFarm,
   selectItemById,
   SET_SELECTED,
   setSelectedItem
@@ -78,6 +79,12 @@ describe('reducer', () => {
     });
   });
   describe('BUILD_FARM', () => {
+    it('should build farm', () => {
+      const state = {...dState, items: [...dState.items, {...dAgent, type: 'grass'}]};
+      const agentId = getAgent(state).id;
+      const uState = reducer(state, buildFarm(agentId)(() => true));
+      expect(uState.items.find((item) => item.type === 'farm')).toHaveProperty('builderId', agentId);
+    });
   });
   describe('END_TURN', () => {
   });

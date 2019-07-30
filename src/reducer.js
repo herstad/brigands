@@ -127,6 +127,14 @@ export const autoAction = getAgent => ({
   }
 });
 
+export const buildFarm = agentId => condition => ({
+  type: BUILD_FARM,
+  payload: {
+    agentId,
+    condition,
+  }
+});
+
 export const setSelectedItem = id => ({type: SET_SELECTED, payload: id});
 
 export default function reducer(state, action) {

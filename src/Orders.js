@@ -7,7 +7,7 @@ import {ReducerDispatch} from "./App";
 import {
   ATTACK,
   autoAction,
-  BUILD_FARM,
+  buildFarm,
   END_TURN,
   HARVEST_CROP,
   MOVE,
@@ -160,13 +160,7 @@ function BuildFarmButton() {
     return null;
   }
   const handleBuildFarm = () => {
-    dispatch({
-      type: BUILD_FARM,
-      payload: {
-        agentId: agent.id,
-        condition,
-      }
-    })
+    dispatch(buildFarm(agent.id)(condition))
   };
   return (<Button color='default' onClick={handleBuildFarm}>Build farm</Button>);
 }
