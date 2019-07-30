@@ -3,9 +3,9 @@ import reducer, {
   autoAction,
   buildFarm,
   harvestCrop,
+  moveTowardTarget,
   plantCrop,
   selectItemById,
-  SET_SELECTED,
   setSelectedItem
 } from "./reducer";
 import {findItemByType} from "./itemsUtil";
@@ -16,6 +16,7 @@ describe('reducer', () => {
   const dState = {items: [dAgent, dTarget], behaviors: {}};
   const getAgent = selectItemById(dAgent.id);
   const getTarget = selectItemById(dTarget.id);
+  const truthy = () => true;
 
   it('should return same state', () => {
     const state = {noChange: true};
@@ -85,7 +86,7 @@ describe('reducer', () => {
     it('should build farm', () => {
       const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
       const agentId = getAgent(state).id;
-      const uState = reducer(state, buildFarm(agentId)(() => true));
+      const uState = reducer(state, buildFarm(agentId)(truthy));
       expect(findItemByType(uState.items)('farm')).toHaveProperty('builderId', agentId);
     });
   });
@@ -96,18 +97,22 @@ describe('reducer', () => {
   describe('HARVEST_CROP', () => {
     it('should plant crop', () => {
       const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'crop'}]};
-      const uState = reducer(state, harvestCrop(getAgent)(() => true));
+      const uState = reducer(state, harvestCrop(getAgent)(truthy));
       expect(findItemByType(uState.items)('crop')).toBe(undefined);
       expect(getAgent(uState)).toHaveProperty('resources', ['crop']);
     });
   });
   describe('MOVE', () => {
+    it('should move right', () => {
+      const uState = reducer(dState, moveTowardTarget(getAgent)(getTarget)(truthy));
+      expect(getAgent(uState)).toHaveProperty('y', 1)
+    });
   });
   describe('PLANT_CROP', () => {
     it('should plant crop', () => {
       const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
       const agentId = getAgent(state).id;
-      const uState = reducer(state, plantCrop(agentId)(() => true));
+      const uState = reducer(state, plantCrop(agentId)(truthy));
       expect(findItemByType(uState.items)('planted')).toHaveProperty('builderId', agentId);
     });
   });

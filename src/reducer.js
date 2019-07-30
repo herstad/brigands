@@ -151,6 +151,15 @@ export const harvestCrop = getAgent => condition => ({
   }
 });
 
+export const moveTowardTarget = getAgent => getTarget => condition => ({
+  type: MOVE,
+  payload: {
+    getAgent,
+    getTarget,
+    condition,
+  }
+});
+
 
 export const setSelectedItem = id => ({type: SET_SELECTED, payload: id});
 

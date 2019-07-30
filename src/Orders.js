@@ -10,7 +10,7 @@ import {
   buildFarm,
   END_TURN,
   harvestCrop,
-  MOVE,
+  moveTowardTarget,
   plantCrop,
   selectItemById,
   selectSelectedItem,
@@ -100,16 +100,7 @@ const targetClosestType = getAgent => type => state => state.items.filter(item =
 //TODO separate item type and if it is a home. hardcoding 'farm' as that is the only home type
 const targetHome = getAgent => state => state.items.filter(item => item.type === 'farm' && item.builderId === getAgent(state).id)[0];
 
-const handleMove = getAgent => getTarget => condition => dispatch => () => {
-  dispatch({
-    type: MOVE,
-    payload: {
-      getAgent,
-      getTarget,
-      condition,
-    }
-  })
-};
+const handleMove = getAgent => getTarget => condition => dispatch => () => dispatch(moveTowardTarget(getAgent)(getTarget)(condition));
 
 function MoveToGrassButton() {
   const {state} = useContext(ReducerDispatch);
