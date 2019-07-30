@@ -11,7 +11,7 @@ import {
   END_TURN,
   HARVEST_CROP,
   MOVE,
-  PLANT_CROP,
+  plantCrop,
   selectItemById,
   selectSelectedItem,
   UNLOAD_RESOURCE
@@ -175,15 +175,7 @@ function PlantCropButton() {
   if (!shouldDisplayOrder(agent.id)(condition)(state)) {
     return null;
   }
-  const handlePlantCrop = () => {
-    dispatch({
-      type: PLANT_CROP,
-      payload: {
-        agentId: agent.id,
-        condition,
-      }
-    })
-  };
+  const handlePlantCrop = () => dispatch(plantCrop(agent.id)(condition));
   return (<Button color='default' onClick={handlePlantCrop}>PlantCrop</Button>);
 }
 

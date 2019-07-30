@@ -135,6 +135,15 @@ export const buildFarm = agentId => condition => ({
   }
 });
 
+export const plantCrop = agentId => condition => ({
+  type: PLANT_CROP,
+  payload: {
+    agentId,
+    condition,
+  }
+});
+
+
 export const setSelectedItem = id => ({type: SET_SELECTED, payload: id});
 
 export default function reducer(state, action) {

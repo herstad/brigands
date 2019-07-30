@@ -2,10 +2,12 @@ import reducer, {
   ATTACK,
   autoAction,
   buildFarm,
+  plantCrop,
   selectItemById,
   SET_SELECTED,
   setSelectedItem
 } from "./reducer";
+import {findItemByType} from "./itemsUtil";
 
 describe('reducer', () => {
   const dAgent = {id: 0, ap: 1, x: 0, y: 0, hp: 5};
@@ -83,7 +85,7 @@ describe('reducer', () => {
       const state = {...dState, items: [...dState.items, {...dAgent, type: 'grass'}]};
       const agentId = getAgent(state).id;
       const uState = reducer(state, buildFarm(agentId)(() => true));
-      expect(uState.items.find((item) => item.type === 'farm')).toHaveProperty('builderId', agentId);
+      expect(findItemByType(uState.items)('farm')).toHaveProperty('builderId', agentId);
     });
   });
   describe('END_TURN', () => {
@@ -95,6 +97,12 @@ describe('reducer', () => {
   describe('MOVE', () => {
   });
   describe('PLANT_CROP', () => {
+    it('should plant crop', () => {
+      const state = {...dState, items: [...dState.items, {...dAgent, type: 'grass'}]};
+      const agentId = getAgent(state).id;
+      const uState = reducer(state, plantCrop(agentId)(() => true));
+      expect(findItemByType(uState.items)('planted')).toHaveProperty('builderId', agentId);
+    });
   });
   describe('RESTART', () => {
   });
