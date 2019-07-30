@@ -9,13 +9,34 @@ import reducer, {
   selectItemById,
   setActiveEvent,
   setSelectedItem,
+  setUnitBehaviorAction,
   unloadResource
 } from "./reducer";
 import {findItemByType, getItemById} from "./itemsUtil";
 
 describe('reducer', () => {
-  const dAgent = {id: 0, ap: 1, x: 0, y: 0, hp: 5, resources: []};
-  const dTarget = {id: 1, ap: 1, x: 0, y: 1, hp: 5, resources: []};
+  const dAgent = {
+    id: 0,
+    ap: 1,
+    x: 0,
+    y: 0,
+    hp: 5,
+    behaviorName: 'farmer',
+    resources: [],
+    conditionalActions: [],
+    events: [],
+  };
+  const dTarget = {
+    id: 1,
+    ap: 1,
+    x: 0,
+    y: 1,
+    hp: 5,
+    behaviorName: 'farmer',
+    resources: [],
+    conditionalActions: [],
+    events: [],
+  };
   const dState = {items: [dAgent, dTarget], behaviors: {}};
   const getAgent = selectItemById(dAgent.id);
   const getTarget = selectItemById(dTarget.id);
@@ -71,18 +92,9 @@ describe('reducer', () => {
       const uState = reducer({items: [agent]}, autoAction(getAgent));
       expect(uState.selectedId).toBe(validId);
     });
-    it('should set SLEEPING event on no valid actions or events', () => {
-      const agent = {
-        ...dAgent,
-        conditionalActions: [],
-        events: [],
-      };
-      const state = {...dState, items: [agent]};
-      const uState = reducer(state, autoAction(getAgent));
-      expect(uState.items[0].activeEvent.type).toBe('SLEEPING');
-    });
     it('should perform action from next event if no valid actions', () => {
-      //TODO create behavior for DEFAULT_EVENT with validConditionalActionSelect
+      const uState = reducer(dState, setUnitBehaviorAction(getAgent));
+      expect(getAgent(uState)).toHaveProperty('activeEvent.type', 'SLEEPING');
     });
   });
   describe('BUILD_FARM', () => {
@@ -144,6 +156,27 @@ describe('reducer', () => {
     });
   });
   describe('SET_UNIT_BEHAVIOR', () => {
+    it('should set next event', () => {
+      //TODO
+    });
+    it('should set default event if no events', () => {
+      const behaviors = {
+        farmer: {
+          DEFAULT_EVENT: {
+            conditionalActions: [
+              {action: {type: 'TEST_ACTION', payload: {condition: truthy}}, condition: truthy}
+            ]
+          }
+        }
+      };
+      const state = {...dState, behaviors};
+      const uState = reducer(state, setUnitBehaviorAction(getAgent));
+      expect(getAgent(uState)).toHaveProperty('activeEvent.type', 'DEFAULT_EVENT');
+    });
+    it('should set SLEEPING event if default behavior', () => {
+      const uState = reducer(dState, setUnitBehaviorAction(getAgent));
+      expect(getAgent(uState)).toHaveProperty('activeEvent.type', 'SLEEPING');
+    });
   });
   describe('TRAIN_EVENT', () => {
   });

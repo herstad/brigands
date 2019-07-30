@@ -36,7 +36,8 @@ const generateItems = (size = 10) => {
   const units = [
     {
       id: generateId(),
-      hp: 5, type: 'x',
+      hp: 5,
+      type: 'x',
       playerId: 'human',
       ap: 1,
       behaviorName: 'farmer',

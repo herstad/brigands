@@ -113,7 +113,7 @@ const hasBehaviorForEvent = item => event => state => {
 // TODO remove original
 const getNextAction = state => conditionalActions => conditionalActions.find(conditionalAction => conditionalAction.condition(state));
 
-const setUnitBehaviorAction = getAgent => ({
+export const setUnitBehaviorAction = getAgent => ({
   type: 'SET_UNIT_BEHAVIOR',
   payload: {
     getAgent,
