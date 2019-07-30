@@ -143,6 +143,14 @@ export const plantCrop = agentId => condition => ({
   }
 });
 
+export const harvestCrop = getAgent => condition => ({
+  type: HARVEST_CROP,
+  payload: {
+    getAgent,
+    condition,
+  }
+});
+
 
 export const setSelectedItem = id => ({type: SET_SELECTED, payload: id});
 

@@ -2,6 +2,7 @@ import reducer, {
   ATTACK,
   autoAction,
   buildFarm,
+  harvestCrop,
   plantCrop,
   selectItemById,
   SET_SELECTED,
@@ -10,8 +11,8 @@ import reducer, {
 import {findItemByType} from "./itemsUtil";
 
 describe('reducer', () => {
-  const dAgent = {id: 0, ap: 1, x: 0, y: 0, hp: 5};
-  const dTarget = {id: 1, ap: 1, x: 0, y: 1, hp: 5};
+  const dAgent = {id: 0, ap: 1, x: 0, y: 0, hp: 5, resources: []};
+  const dTarget = {id: 1, ap: 1, x: 0, y: 1, hp: 5, resources: []};
   const dState = {items: [dAgent, dTarget], behaviors: {}};
   const getAgent = selectItemById(dAgent.id);
   const getTarget = selectItemById(dTarget.id);
@@ -82,7 +83,7 @@ describe('reducer', () => {
   });
   describe('BUILD_FARM', () => {
     it('should build farm', () => {
-      const state = {...dState, items: [...dState.items, {...dAgent, type: 'grass'}]};
+      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
       const agentId = getAgent(state).id;
       const uState = reducer(state, buildFarm(agentId)(() => true));
       expect(findItemByType(uState.items)('farm')).toHaveProperty('builderId', agentId);
@@ -93,12 +94,18 @@ describe('reducer', () => {
   describe('FINISH_TRAIN_EVENT', () => {
   });
   describe('HARVEST_CROP', () => {
+    it('should plant crop', () => {
+      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'crop'}]};
+      const uState = reducer(state, harvestCrop(getAgent)(() => true));
+      expect(findItemByType(uState.items)('crop')).toBe(undefined);
+      expect(getAgent(uState)).toHaveProperty('resources', ['crop']);
+    });
   });
   describe('MOVE', () => {
   });
   describe('PLANT_CROP', () => {
     it('should plant crop', () => {
-      const state = {...dState, items: [...dState.items, {...dAgent, type: 'grass'}]};
+      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
       const agentId = getAgent(state).id;
       const uState = reducer(state, plantCrop(agentId)(() => true));
       expect(findItemByType(uState.items)('planted')).toHaveProperty('builderId', agentId);

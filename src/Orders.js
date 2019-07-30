@@ -9,7 +9,7 @@ import {
   autoAction,
   buildFarm,
   END_TURN,
-  HARVEST_CROP,
+  harvestCrop,
   MOVE,
   plantCrop,
   selectItemById,
@@ -187,15 +187,7 @@ function HarvestCropButton() {
   if (!shouldDisplayOrder(agent.id)(condition)(state)) {
     return null;
   }
-  const handleHarvestCrop = () => {
-    dispatch({
-      type: HARVEST_CROP,
-      payload: {
-        getAgent,
-        condition,
-      }
-    })
-  };
+  const handleHarvestCrop = () => dispatch(harvestCrop(getAgent)(condition));
   return (<Button color='default' onClick={handleHarvestCrop}>HarvestCrop</Button>);
 }
 
