@@ -5,6 +5,7 @@ import reducer, {
   harvestCrop,
   moveTowardTarget,
   plantCrop,
+  restart,
   selectItemById,
   setActiveEvent,
   setSelectedItem,
@@ -119,11 +120,22 @@ describe('reducer', () => {
     });
   });
   describe('RESTART', () => {
+    it('should reset state', () => {
+      const uState = reducer({turn: 99}, restart());
+      expect(uState).toHaveProperty('turn', 0);
+    });
+    it('should not reset behavior', () => {
+      const behaviors = {farmer: {}};
+      const uState = reducer({behaviors}, restart());
+      expect(uState).toHaveProperty('behaviors', behaviors);
+    });
   });
   describe('SET_ACTIVE_EVENT', () => {
-    const event = {type: 'TEST_EVENT'};
-    const uState = reducer(dState, setActiveEvent(getAgent)(event));
-    expect(getAgent(uState)).toHaveProperty('activeEvent', event)
+    it('should set active event on agent', () => {
+      const event = {type: 'TEST_EVENT'};
+      const uState = reducer(dState, setActiveEvent(getAgent)(event));
+      expect(getAgent(uState)).toHaveProperty('activeEvent', event);
+    });
   });
   describe('SET_SELECTED', () => {
     it('should set selected', () => {

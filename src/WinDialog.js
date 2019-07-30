@@ -6,12 +6,13 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import {ReducerDispatch} from "./App";
+import {restart} from "./reducer";
 
 export default function WinDialog() {
   const {state, dispatch} = useContext(ReducerDispatch);
 
 
-  const handleRestart = () => dispatch({type: 'RESTART', payload: undefined});
+  const handleRestart = () => dispatch(restart());
   return (
     <div>
       <Dialog open={!!state.winner} aria-labelledby="alert-dialog-title"

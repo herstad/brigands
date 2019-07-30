@@ -176,6 +176,8 @@ export const setActiveEvent = getAgent => event => ({
   }
 });
 
+export const restart = () => ({type: 'RESTART', payload: undefined});
+
 export const setSelectedItem = id => ({type: SET_SELECTED, payload: id});
 
 export default function reducer(state, action) {
