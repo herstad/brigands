@@ -1,4 +1,5 @@
 import reducer, {
+  attack,
   ATTACK,
   autoAction,
   buildFarm,
@@ -70,7 +71,7 @@ describe('reducer', () => {
 
   describe('ATTACK', () => {
     it('should reduce hp of target', () => {
-      const uState = reducer(dState, {type: ATTACK, payload: {getAgent, getTarget}});
+      const uState = reducer(dState, attack(getAgent)(getTarget)(truthy));
       const uAgent = getAgent(uState);
       const uTarget = getTarget(uState);
       expect(uAgent.ap).toBe(0);
@@ -78,7 +79,7 @@ describe('reducer', () => {
     });
     it('should do nothing if target not in range', () => {
       const state = {items: [dAgent, {...dTarget, y: 2}]};
-      const uState = reducer(state, {type: ATTACK, payload: {getAgent, getTarget}});
+      const uState = reducer(state, attack(getAgent)(getTarget)(truthy));
       const uAgent = getAgent(uState);
       const uTarget = getTarget(uState);
       expect(uAgent.ap).toBe(1);

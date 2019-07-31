@@ -5,6 +5,7 @@ import Button from '@material-ui/core/Button';
 import {getEnemyItems, getItemByXYAndType, getItemsByPlayer} from "./itemsUtil";
 import {ReducerDispatch} from "./App";
 import {
+  attack,
   ATTACK,
   autoAction,
   buildFarm,
@@ -70,16 +71,7 @@ function AttackButton({targetId}) {
     return null;
   }
   const color = getButtonColor('ATTACK', state);
-  const handleAttack = () => {
-    dispatch({
-      type: ATTACK,
-      payload: {
-        getAgent,
-        getTarget,
-        condition,
-      }
-    })
-  };
+  const handleAttack = () => dispatch(attack(getAgent)(getTarget)(condition));
   return (<Button color={color} onClick={handleAttack}>Attack Enemy</Button>);
 }
 
