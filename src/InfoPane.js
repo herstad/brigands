@@ -9,9 +9,8 @@ import {
   FINISH_TRAIN_EVENT,
   selectItemById,
   selectSelectedItem,
-  SET_ACTIVE_EVENT,
   setActiveEvent,
-  TRAIN_EVENT
+  trainEventBehavior
 } from "./reducer";
 
 function UnitCard() {
@@ -61,20 +60,8 @@ function TrainEventButton({event}) {
     return null;
   }
   const handleTrainEvent = () => {
-    dispatch({
-      type: SET_ACTIVE_EVENT,
-      payload: {
-        event,
-        getAgent: selectItemById(agent.id)
-      }
-    });
-    dispatch({
-      type: TRAIN_EVENT,
-      payload: {
-        agentId: agent.id,
-        event,
-      }
-    })
+    dispatch(setActiveEvent(selectItemById(agent.id))(event));
+    dispatch(trainEventBehavior(agent.id)(event));
   };
   return (<Button color='default' onClick={handleTrainEvent}>Train {event.type} Behavior</Button>);
 }

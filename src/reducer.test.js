@@ -10,6 +10,7 @@ import reducer, {
   setActiveEvent,
   setSelectedItem,
   setUnitBehaviorAction,
+  trainEventBehavior,
   unloadResource
 } from "./reducer";
 import {findItemByType, getItemById} from "./itemsUtil";
@@ -183,6 +184,10 @@ describe('reducer', () => {
     });
   });
   describe('TRAIN_EVENT', () => {
+    const event = {type: 'TEST_EVENT'};
+    it('should set training=true', () => {
+      const uState = reducer(dState, trainEventBehavior(getAgent(dState).id))
+    });
   });
   describe('UNLOAD_RESOURCE', () => {
     it('should unload resource from agent to home', () => {

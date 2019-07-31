@@ -176,6 +176,14 @@ export const setActiveEvent = getAgent => event => ({
   }
 });
 
+export const trainEventBehavior = agentId => event => ({
+  type: TRAIN_EVENT,
+  payload: {
+    agentId,
+    event,
+  }
+});
+
 export const restart = () => ({type: 'RESTART', payload: undefined});
 
 export const setSelectedItem = id => ({type: SET_SELECTED, payload: id});
