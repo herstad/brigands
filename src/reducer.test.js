@@ -2,6 +2,7 @@ import reducer, {
   ATTACK,
   autoAction,
   buildFarm,
+  finishTrainEventBehavior,
   harvestCrop,
   moveTowardTarget,
   plantCrop,
@@ -43,6 +44,24 @@ describe('reducer', () => {
   const getAgent = selectItemById(dAgent.id);
   const getTarget = selectItemById(dTarget.id);
   const truthy = () => true;
+
+  const fakeConditionalActions = [
+    {action: {type: 'TEST_ACTION', payload: {condition: truthy}}, condition: truthy}
+  ];
+
+  const fakeBehavior = eventType => ({
+    farmer: {
+      [eventType]: {
+        conditionalActions: fakeConditionalActions,
+      }
+    }
+  });
+
+  const fakeBehaviorTraining = eventType => ({
+    name: 'farmer',
+    eventType,
+    conditionalActions: fakeConditionalActions,
+  });
 
   it('should return same state', () => {
     const state = {noChange: true};
@@ -109,6 +128,21 @@ describe('reducer', () => {
   describe('END_TURN', () => {
   });
   describe('FINISH_TRAIN_EVENT', () => {
+    it('should set training to false', () => {
+      const behaviorTraining = fakeBehaviorTraining('TEST_FINISH_EVENT');
+      const agent = {...dAgent, training: true, behaviorTraining};
+      const state = {...dState, items: [agent]};
+      const uState = reducer(state, finishTrainEventBehavior(agentId));
+      expect(getAgent(uState)).toHaveProperty('training', false);
+      expect(getAgent(uState)).toHaveProperty('behaviorTraining', {});
+    });
+    it('should add trained behavior to behaviors', () => {
+      const behaviorTraining = fakeBehaviorTraining('TEST_FINISH_EVENT');
+      const agent = {...dAgent, training: true, behaviorTraining};
+      const state = {...dState, items: [agent]};
+      const uState = reducer(state, finishTrainEventBehavior(agentId));
+      expect(uState).toHaveProperty('behaviors.farmer.TEST_FINISH_EVENT.conditionalActions', fakeConditionalActions);
+    });
   });
   describe('HARVEST_CROP', () => {
     it('should plant crop', () => {
@@ -156,15 +190,6 @@ describe('reducer', () => {
     });
   });
   describe('SET_UNIT_BEHAVIOR', () => {
-    const fakeBehavior = eventType => ({
-      farmer: {
-        [eventType]: {
-          conditionalActions: [
-            {action: {type: 'TEST_ACTION', payload: {condition: truthy}}, condition: truthy}
-          ]
-        }
-      }
-    });
     it('should set next event', () => {
       const behaviors = fakeBehavior('TEST_EVENT');
       const state = {items: [{...dAgent, events: [{type: 'TEST_EVENT'}]}], behaviors};

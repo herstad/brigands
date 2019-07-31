@@ -6,7 +6,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import {ReducerDispatch} from "./App";
 import Button from "@material-ui/core/Button";
 import {
-  FINISH_TRAIN_EVENT,
+  finishTrainEventBehavior,
   selectItemById,
   selectSelectedItem,
   setActiveEvent,
@@ -72,14 +72,7 @@ function FinishTrainEventButton() {
   if (agent === undefined || !agent.training) {
     return null;
   }
-  const handleTrainEvent = () => {
-    dispatch({
-      type: FINISH_TRAIN_EVENT,
-      payload: {
-        agentId: agent.id,
-      }
-    })
-  };
+  const handleTrainEvent = () => dispatch(finishTrainEventBehavior(agent.id));
   return (
     <Button color='default' onClick={handleTrainEvent}>Finish train event Behavior</Button>);
 }
