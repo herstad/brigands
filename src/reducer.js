@@ -14,20 +14,20 @@ import {
 import {move, toward} from "./movement";
 import {pipe} from "./functional";
 
-export const ATTACK = 'ATTACK';
-export const AUTO_ACTION = 'AUTO_ACTION';
-export const BUILD_FARM = 'BUILD_FARM';
-export const END_TURN = 'END_TURN';
-export const FINISH_TRAIN_EVENT = 'FINISH_TRAIN_EVENT';
-export const HARVEST_CROP = 'HARVEST_CROP';
-export const MOVE = 'MOVE';
-export const PLANT_CROP = 'PLANT_CROP';
-export const RESTART = 'RESTART';
-export const SET_ACTIVE_EVENT = 'SET_ACTIVE_EVENT';
-export const SET_SELECTED = 'SET_SELECTED';
-export const SET_UNIT_BEHAVIOR = 'SET_UNIT_BEHAVIOR';
-export const TRAIN_EVENT = 'TRAIN_EVENT';
-export const UNLOAD_RESOURCE = 'UNLOAD_RESOURCE';
+export const ATTACK = 'brigands/reducer/ATTACK';
+export const AUTO_ACTION = 'brigands/reducer/AUTO_ACTION';
+export const BUILD_FARM = 'brigands/reducer/BUILD_FARM';
+export const END_TURN = 'brigands/reducer/END_TURN';
+export const FINISH_TRAIN_EVENT = 'brigands/reducer/FINISH_TRAIN_EVENT';
+export const HARVEST_CROP = 'brigands/reducer/HARVEST_CROP';
+export const MOVE = 'brigands/reducer/MOVE';
+export const PLANT_CROP = 'brigands/reducer/PLANT_CROP';
+export const RESTART = 'brigands/reducer/RESTART';
+export const SET_ACTIVE_EVENT = 'brigands/reducer/SET_ACTIVE_EVENT';
+export const SET_SELECTED = 'brigands/reducer/SET_SELECTED';
+export const SET_UNIT_BEHAVIOR = 'brigands/reducer/SET_UNIT_BEHAVIOR';
+export const TRAIN_EVENT = 'brigands/reducer/TRAIN_EVENT';
+export const UNLOAD_RESOURCE = 'brigands/reducer/UNLOAD_RESOURCE';
 
 
 export const selectItemById = id => state => getItemById(id, state.items);
@@ -127,7 +127,7 @@ export const attack = getAgent => getTarget => condition => ({
 });
 
 export const setUnitBehaviorAction = getAgent => ({
-  type: 'SET_UNIT_BEHAVIOR',
+  type: SET_UNIT_BEHAVIOR,
   payload: {
     getAgent,
   }
@@ -204,7 +204,7 @@ export const finishTrainEventBehavior = agentId => ({
   }
 });
 
-export const restart = () => ({type: 'RESTART', payload: undefined});
+export const restart = () => ({type: RESTART, payload: undefined});
 
 export const setSelectedItem = id => ({type: SET_SELECTED, payload: id});
 
@@ -213,7 +213,7 @@ export default function reducer(state, action) {
   console.log(action);
   const {payload} = action;
   switch (action.type) {
-    case 'END_TURN': {
+    case END_TURN: {
       const apItems = updateItems((item) => isPlayer(selectActivePlayerId(state), item))({ap: 1})(state.items);
       const grownCrops = apItems.filter(plantedShouldGrow(state.turn));
       const newCrops = updateItems(plantedShouldGrow(state.turn))({type: 'crop',})(grownCrops);

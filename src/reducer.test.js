@@ -1,6 +1,5 @@
 import reducer, {
   attack,
-  ATTACK,
   autoAction,
   buildFarm,
   endTurn,
