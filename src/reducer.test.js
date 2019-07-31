@@ -133,8 +133,13 @@ describe('reducer', () => {
   describe('BUILD_FARM', () => {
     it('should build farm', () => {
       const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
-      const uState = reducer(state, buildFarm(agentId)(truthy));
+      const uState = reducer(state, buildFarm(getAgent)(truthy));
       expect(findItemByType(uState.items)('farm')).toHaveProperty('builderId', agentId);
+    });
+    it('should consume ap', () => {
+      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
+      const uState = reducer(state, buildFarm(getAgent)(truthy));
+      expect(getAgent(uState)).toHaveProperty('ap', 0);
     });
   });
   describe('END_TURN', () => {
@@ -166,7 +171,7 @@ describe('reducer', () => {
       const behaviorTraining = fakeBehaviorTraining('TEST_FINISH_EVENT');
       const agent = {...dAgent, training: true, behaviorTraining};
       const state = {...dState, items: [agent]};
-      const uState = reducer(state, finishTrainEventBehavior(agentId));
+      const uState = reducer(state, finishTrainEventBehavior(getAgent));
       expect(getAgent(uState)).toHaveProperty('training', false);
       expect(getAgent(uState)).toHaveProperty('behaviorTraining', {});
     });
@@ -174,7 +179,7 @@ describe('reducer', () => {
       const behaviorTraining = fakeBehaviorTraining('TEST_FINISH_EVENT');
       const agent = {...dAgent, training: true, behaviorTraining};
       const state = {...dState, items: [agent]};
-      const uState = reducer(state, finishTrainEventBehavior(agentId));
+      const uState = reducer(state, finishTrainEventBehavior(getAgent));
       expect(uState).toHaveProperty('behaviors.farmer.TEST_FINISH_EVENT.conditionalActions', fakeConditionalActions);
     });
   });
@@ -195,7 +200,7 @@ describe('reducer', () => {
   describe('PLANT_CROP', () => {
     it('should plant crop', () => {
       const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
-      const uState = reducer(state, plantCrop(agentId)(truthy));
+      const uState = reducer(state, plantCrop(getAgent)(truthy));
       expect(findItemByType(uState.items)('planted')).toHaveProperty('builderId', agentId);
     });
   });
@@ -244,11 +249,11 @@ describe('reducer', () => {
   describe('TRAIN_EVENT', () => {
     const event = {type: 'TEST_EVENT'};
     it('should set training=true', () => {
-      const uState = reducer(dState, trainEventBehavior(agentId)(event));
+      const uState = reducer(dState, trainEventBehavior(getAgent)(event));
       expect(getAgent(uState)).toHaveProperty('training', true);
     });
     it('should set event on behaviorTraining', () => {
-      const uState = reducer(dState, trainEventBehavior(agentId)(event));
+      const uState = reducer(dState, trainEventBehavior(getAgent)(event));
       expect(getAgent(uState)).toHaveProperty('behaviorTraining.event', event);
     });
   });

@@ -32,7 +32,7 @@ export const UNLOAD_RESOURCE = 'brigands/reducer/UNLOAD_RESOURCE';
 
 export const selectItemById = id => state => getItemById(id, state.items);
 
-export const selectSelectedItem = (state) => getItemById(state.selectedId, state.items);
+export const selectSelectedItem = state => getItemById(state.selectedId, state.items);
 
 const selectEventBehavior = behaviorName => eventType => state => {
   const behavior = state.behaviors[behaviorName] || {};
@@ -84,18 +84,18 @@ const consumeAp = (action, state) => {
 
 const postAction = action => state => consumeAp(action, state);
 
-const createBuilding = (builderId, type, state) => {
-  const builder = selectItemById(builderId)(state);
+const createBuilding = (getAgent, type, state) => {
+  const builder = getAgent(state);
   const target = getItemByXYAndType(state.items)(builder)('grass');
-  return createBuildingOn(builderId)(type)(target.id)(state);
+  return createBuildingOn(getAgent)(type)(target.id)(state);
 };
 
-const createBuildingOn = builderId => buildingType => targetId => state => {
-  const builder = selectItemById(builderId)(state);
+const createBuildingOn = getAgent => buildingType => targetId => state => {
+  const builder = getAgent(state);
   const clearedItems = removeItemById(targetId, state.items);
   const building = {
     id: generateId(),
-    builderId,
+    builderId: builder.id,
     x: builder.x,
     y: builder.y,
     type: buildingType,
@@ -140,18 +140,18 @@ export const autoAction = getAgent => ({
   }
 });
 
-export const buildFarm = agentId => condition => ({
+export const buildFarm = getAgent => condition => ({
   type: BUILD_FARM,
   payload: {
-    agentId,
+    getAgent,
     condition,
   }
 });
 
-export const plantCrop = agentId => condition => ({
+export const plantCrop = getAgent => condition => ({
   type: PLANT_CROP,
   payload: {
-    agentId,
+    getAgent,
     condition,
   }
 });
@@ -189,18 +189,18 @@ export const setActiveEvent = getAgent => event => ({
   }
 });
 
-export const trainEventBehavior = agentId => event => ({
+export const trainEventBehavior = getAgent => event => ({
   type: TRAIN_EVENT,
   payload: {
-    agentId,
+    getAgent,
     event,
   }
 });
 
-export const finishTrainEventBehavior = agentId => ({
+export const finishTrainEventBehavior = getAgent => ({
   type: FINISH_TRAIN_EVENT,
   payload: {
-    agentId,
+    getAgent,
   }
 });
 
@@ -275,10 +275,10 @@ export default function reducer(state, action) {
       return pipe(moveAgent, postAction(action))(state);
     }
     case BUILD_FARM: {
-      return createBuilding(payload.agentId, 'farm', consumeAp(action, state));
+      return createBuilding(payload.getAgent, 'farm', consumeAp(action, state));
     }
     case PLANT_CROP: {
-      return createBuilding(payload.agentId, 'planted', consumeAp(action, state));
+      return createBuilding(payload.getAgent, 'planted', consumeAp(action, state));
     }
     case HARVEST_CROP: {
       const agent = payload.getAgent(state);
@@ -287,7 +287,7 @@ export default function reducer(state, action) {
         ...agent,
         resources: [...agent.resources, 'crop']
       }, state);
-      return createBuildingOn(agent.id)('grass')(target.id)(consumeAp(action, addedResourceState));
+      return createBuildingOn(payload.getAgent)('grass')(target.id)(consumeAp(action, addedResourceState));
     }
     case UNLOAD_RESOURCE: {
       const agent = payload.getAgent(state);
@@ -300,16 +300,16 @@ export default function reducer(state, action) {
       // state)));
     }
     case TRAIN_EVENT: {
-      const {agentId, event} = payload;
+      const {getAgent, event} = payload;
       return updateItemById({
-        id: agentId,
+        id: getAgent(state).id,
         behaviorTraining: {name: 'farmer', eventType: event.type, event, conditionalActions: []},
         training: true,
       }, state);
     }
     case FINISH_TRAIN_EVENT: {
-      const {agentId} = payload;
-      const agent = selectItemById(agentId)(state);
+      const {getAgent} = payload;
+      const agent = getAgent(state);
       const {name, eventType, conditionalActions} = agent.behaviorTraining;
       const behavior = state.behaviors[name] || {};
       const updatedBehavior = {

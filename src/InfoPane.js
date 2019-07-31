@@ -55,24 +55,26 @@ function SelectEventButton({event}) {
 
 function TrainEventButton({event}) {
   const {state, dispatch} = useContext(ReducerDispatch);
-  const agent = selectSelectedItem(state);
-  if (agent === undefined || agent.training) {
+  const getAgent = selectItemById(state.selectedId);
+  const agent = getAgent(state);
+  if (!agent || agent.training) {
     return null;
   }
   const handleTrainEvent = () => {
-    dispatch(setActiveEvent(selectItemById(agent.id))(event));
-    dispatch(trainEventBehavior(agent.id)(event));
+    dispatch(setActiveEvent(getAgent)(event));
+    dispatch(trainEventBehavior(getAgent)(event));
   };
   return (<Button color='default' onClick={handleTrainEvent}>Train {event.type} Behavior</Button>);
 }
 
 function FinishTrainEventButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
-  const agent = selectSelectedItem(state);
-  if (agent === undefined || !agent.training) {
+  const getAgent = selectItemById(state.selectedId);
+  const agent = getAgent(state);
+  if (!agent || !agent.training) {
     return null;
   }
-  const handleTrainEvent = () => dispatch(finishTrainEventBehavior(agent.id));
+  const handleTrainEvent = () => dispatch(finishTrainEventBehavior(getAgent));
   return (
     <Button color='default' onClick={handleTrainEvent}>Finish train event Behavior</Button>);
 }

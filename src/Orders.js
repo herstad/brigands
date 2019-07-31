@@ -139,7 +139,7 @@ function BuildFarmButton() {
     return null;
   }
   const handleBuildFarm = () => {
-    dispatch(buildFarm(agent.id)(condition))
+    dispatch(buildFarm(getAgent)(condition))
   };
   return (<Button color='default' onClick={handleBuildFarm}>Build farm</Button>);
 }
@@ -154,7 +154,7 @@ function PlantCropButton() {
   if (!shouldDisplayOrder(agent.id)(condition)(state)) {
     return null;
   }
-  const handlePlantCrop = () => dispatch(plantCrop(agent.id)(condition));
+  const handlePlantCrop = () => dispatch(plantCrop(getAgent)(condition));
   return (<Button color='default' onClick={handlePlantCrop}>PlantCrop</Button>);
 }
 
