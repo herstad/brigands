@@ -156,19 +156,23 @@ describe('reducer', () => {
     });
   });
   describe('SET_UNIT_BEHAVIOR', () => {
+    const fakeBehavior = eventType => ({
+      farmer: {
+        [eventType]: {
+          conditionalActions: [
+            {action: {type: 'TEST_ACTION', payload: {condition: truthy}}, condition: truthy}
+          ]
+        }
+      }
+    });
     it('should set next event', () => {
-      //TODO
+      const behaviors = fakeBehavior('TEST_EVENT');
+      const state = {items: [{...dAgent, events: [{type: 'TEST_EVENT'}]}], behaviors};
+      const uState = reducer(state, setUnitBehaviorAction(getAgent));
+      expect(getAgent(uState)).toHaveProperty('activeEvent.type', 'TEST_EVENT');
     });
     it('should set default event if no events', () => {
-      const behaviors = {
-        farmer: {
-          DEFAULT_EVENT: {
-            conditionalActions: [
-              {action: {type: 'TEST_ACTION', payload: {condition: truthy}}, condition: truthy}
-            ]
-          }
-        }
-      };
+      const behaviors = fakeBehavior('DEFAULT_EVENT');
       const state = {...dState, behaviors};
       const uState = reducer(state, setUnitBehaviorAction(getAgent));
       expect(getAgent(uState)).toHaveProperty('activeEvent.type', 'DEFAULT_EVENT');
