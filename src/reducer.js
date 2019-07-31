@@ -42,6 +42,8 @@ const selectEventBehavior = behaviorName => eventType => state => {
 
 export const selectEvents = state => state.events;
 
+export const selectActivePlayerId = state => state.activePlayerId;
+
 const nextPlayer = (activePlayerId) => {
   const index = PLAYERS.findIndex((id) => id === activePlayerId);
   return PLAYERS[(index + 1) % PLAYERS.length];
@@ -112,6 +114,8 @@ const hasBehaviorForEvent = item => event => state => {
 
 // TODO remove original
 const getNextAction = state => conditionalActions => conditionalActions.find(conditionalAction => conditionalAction.condition(state));
+
+export const endTurn = () => ({type: END_TURN,});
 
 export const attack = getAgent => getTarget => condition => ({
   type: ATTACK,
@@ -210,7 +214,7 @@ export default function reducer(state, action) {
   const {payload} = action;
   switch (action.type) {
     case 'END_TURN': {
-      const apItems = updateItems((item) => isPlayer(payload, item))({ap: 1})(state.items);
+      const apItems = updateItems((item) => isPlayer(selectActivePlayerId(state), item))({ap: 1})(state.items);
       const grownCrops = apItems.filter(plantedShouldGrow(state.turn));
       const newCrops = updateItems(plantedShouldGrow(state.turn))({type: 'crop',})(grownCrops);
       let items = replaceItems(apItems)(newCrops);
@@ -222,20 +226,18 @@ export default function reducer(state, action) {
       }));
       const events = [...state.events, ...cropEvents].filter(e => e.turn === state.turn);
 
-
-      const updatedEventItems = getItemsByPlayer(state.activePlayerId, items).map(item => (
+      const updatedEventItems = getItemsByPlayer(selectActivePlayerId(state), items).map(item => (
         {
           ...item,
           events: [...item.events, ...events.filter(event => hasBehaviorForEvent(item)(event)(state) || item.training)]
         }));
       items = replaceItems(items)(updatedEventItems);
 
-
       return {
         ...state,
         items,
-        turn: nextTurn(state.turn, state.activePlayerId),
-        activePlayerId: nextPlayer(state.activePlayerId),
+        turn: nextTurn(state.turn, selectActivePlayerId(state)),
+        activePlayerId: nextPlayer(selectActivePlayerId(state)),
         winner: getWinner(state),
         events,
       };

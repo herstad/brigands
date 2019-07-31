@@ -3,6 +3,7 @@ import reducer, {
   ATTACK,
   autoAction,
   buildFarm,
+  endTurn,
   finishTrainEventBehavior,
   harvestCrop,
   moveTowardTarget,
@@ -16,10 +17,13 @@ import reducer, {
   unloadResource
 } from "./reducer";
 import {findItemByType, getItemById} from "./itemsUtil";
+import {PLAYERS} from "./stateGenerator";
 
 describe('reducer', () => {
   const dAgent = {
     id: 0,
+    type: 'x',
+    playerId: 'human',
     ap: 1,
     x: 0,
     y: 0,
@@ -31,6 +35,8 @@ describe('reducer', () => {
   };
   const dTarget = {
     id: 1,
+    type: 'o',
+    playerId: 'ai',
     ap: 1,
     x: 0,
     y: 1,
@@ -40,7 +46,13 @@ describe('reducer', () => {
     conditionalActions: [],
     events: [],
   };
-  const dState = {items: [dAgent, dTarget], behaviors: {}};
+  const dState = {
+    items: [dAgent, dTarget],
+    behaviors: {},
+    events: [],
+    activePlayerId: PLAYERS[0],
+    turn: 0
+  };
   const agentId = dAgent.id;
   const getAgent = selectItemById(dAgent.id);
   const getTarget = selectItemById(dTarget.id);
@@ -127,6 +139,28 @@ describe('reducer', () => {
     });
   });
   describe('END_TURN', () => {
+    it('should change active player', () => {
+      const uState = reducer(dState, endTurn());
+      expect(uState).toHaveProperty('activePlayerId', PLAYERS[1])
+    });
+    it('should increment turn if last player', () => {
+      const state = {...dState, activePlayerId: PLAYERS[PLAYERS.length - 1]};
+      const uState = reducer(state, endTurn());
+      expect(uState).toHaveProperty('turn', 1)
+
+    });
+    it('should add events to units', () => {
+      //TODO
+    });
+    it('should grow planted crops', () => {
+      //TODO
+    });
+    it('should replenish ap', () => {
+      const agent = {...dAgent, ap: 0};
+      const state = {...dState, items: [agent]};
+      const uState = reducer(state, endTurn());
+      expect(getAgent(uState)).toHaveProperty('ap', 1);
+    });
   });
   describe('FINISH_TRAIN_EVENT', () => {
     it('should set training to false', () => {

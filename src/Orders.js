@@ -6,10 +6,9 @@ import {getEnemyItems, getItemByXYAndType, getItemsByPlayer} from "./itemsUtil";
 import {ReducerDispatch} from "./App";
 import {
   attack,
-  ATTACK,
   autoAction,
   buildFarm,
-  END_TURN,
+  endTurn,
   harvestCrop,
   moveTowardTarget,
   plantCrop,
@@ -50,10 +49,7 @@ function TurnButton() {
     playerItems.forEach(playerItem => {
       dispatch(autoAction(selectItemById(playerItem.id)));
     });
-    dispatch({
-      type: END_TURN,
-      payload: playerId
-    })
+    dispatch(endTurn());
   };
   return (
     <Button onClick={handleEndTurn(activePlayerId)}>Turn({activePlayerId}): {state.turn}</Button>
