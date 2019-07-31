@@ -82,7 +82,7 @@ describe('reducer', () => {
 
   describe('ATTACK', () => {
     it('should reduce hp of target', () => {
-      const uState = reducer(dState, attack(getAgent)(getTarget)(truthy));
+      const uState = reducer(dState, attack(getAgent)(getTarget));
       const uAgent = getAgent(uState);
       const uTarget = getTarget(uState);
       expect(uAgent.ap).toBe(0);
@@ -90,7 +90,7 @@ describe('reducer', () => {
     });
     it('should do nothing if target not in range', () => {
       const state = {items: [dAgent, {...dTarget, y: 2}]};
-      const uState = reducer(state, attack(getAgent)(getTarget)(truthy));
+      const uState = reducer(state, attack(getAgent)(getTarget));
       const uAgent = getAgent(uState);
       const uTarget = getTarget(uState);
       expect(uAgent.ap).toBe(1);
@@ -133,12 +133,12 @@ describe('reducer', () => {
   describe('BUILD_FARM', () => {
     it('should build farm', () => {
       const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
-      const uState = reducer(state, buildFarm(getAgent)(truthy));
+      const uState = reducer(state, buildFarm(getAgent));
       expect(findItemByType(uState.items)('farm')).toHaveProperty('builderId', agentId);
     });
     it('should consume ap', () => {
       const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
-      const uState = reducer(state, buildFarm(getAgent)(truthy));
+      const uState = reducer(state, buildFarm(getAgent));
       expect(getAgent(uState)).toHaveProperty('ap', 0);
     });
   });
@@ -186,21 +186,21 @@ describe('reducer', () => {
   describe('HARVEST_CROP', () => {
     it('should plant crop', () => {
       const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'crop'}]};
-      const uState = reducer(state, harvestCrop(getAgent)(truthy));
+      const uState = reducer(state, harvestCrop(getAgent));
       expect(findItemByType(uState.items)('crop')).toBe(undefined);
       expect(getAgent(uState)).toHaveProperty('resources', ['crop']);
     });
   });
   describe('MOVE', () => {
     it('should move right', () => {
-      const uState = reducer(dState, moveTowardTarget(getAgent)(getTarget)(truthy));
+      const uState = reducer(dState, moveTowardTarget(getAgent)(getTarget));
       expect(getAgent(uState)).toHaveProperty('y', 1)
     });
   });
   describe('PLANT_CROP', () => {
     it('should plant crop', () => {
       const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
-      const uState = reducer(state, plantCrop(getAgent)(truthy));
+      const uState = reducer(state, plantCrop(getAgent));
       expect(findItemByType(uState.items)('planted')).toHaveProperty('builderId', agentId);
     });
   });
@@ -272,7 +272,7 @@ describe('reducer', () => {
           }]
       };
 
-      const uState = reducer(state, unloadResource(getAgent)(truthy));
+      const uState = reducer(state, unloadResource(getAgent));
       expect(getItemById(99, uState.items)).toHaveProperty('resources', ['crop']);
       expect(getAgent(uState)).toHaveProperty('resources', []);
     });

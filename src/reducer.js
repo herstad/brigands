@@ -11,7 +11,7 @@ import {
   updateItemById,
   updateItems
 } from "./itemsUtil";
-import {move, toward} from "./movement";
+import {calculateDistance, move, toward} from "./movement";
 import {pipe} from "./functional";
 
 export const ATTACK = 'brigands/reducer/ATTACK';
@@ -28,7 +28,6 @@ export const SET_SELECTED = 'brigands/reducer/SET_SELECTED';
 export const SET_UNIT_BEHAVIOR = 'brigands/reducer/SET_UNIT_BEHAVIOR';
 export const TRAIN_EVENT = 'brigands/reducer/TRAIN_EVENT';
 export const UNLOAD_RESOURCE = 'brigands/reducer/UNLOAD_RESOURCE';
-
 
 export const selectItemById = id => state => getItemById(id, state.items);
 
@@ -117,14 +116,19 @@ const getNextAction = state => conditionalActions => conditionalActions.find(con
 
 export const endTurn = () => ({type: END_TURN,});
 
-export const attack = getAgent => getTarget => condition => ({
-  type: ATTACK,
-  payload: {
-    getAgent,
-    getTarget,
-    condition,
+export const attack = getAgent => getTarget => {
+  const range = 1;
+  //TODO different range depending on type
+  const condition = state => calculateDistance(getAgent(state))(getTarget(state)) <= range;
+  return {
+    type: ATTACK,
+    payload: {
+      getAgent,
+      getTarget,
+      condition,
+    }
   }
-});
+};
 
 export const setUnitBehaviorAction = getAgent => ({
   type: SET_UNIT_BEHAVIOR,
@@ -140,46 +144,80 @@ export const autoAction = getAgent => ({
   }
 });
 
-export const buildFarm = getAgent => condition => ({
-  type: BUILD_FARM,
-  payload: {
-    getAgent,
-    condition,
-  }
-});
+const farmerHasFarm = getAgent => state => {
+  return state.items.some((item) => item.type === 'farm' && item.builderId === getAgent(state).id);
+};
 
-export const plantCrop = getAgent => condition => ({
-  type: PLANT_CROP,
-  payload: {
-    getAgent,
-    condition,
+export const buildFarm = getAgent => {
+  const condition = state => {
+    return !farmerHasFarm(getAgent)(state) && getItemByXYAndType(state.items)(getAgent(state))('grass');
+  };
+  return {
+    type: BUILD_FARM,
+    payload: {
+      getAgent,
+      condition,
+    }
   }
-});
+};
 
-export const harvestCrop = getAgent => condition => ({
-  type: HARVEST_CROP,
-  payload: {
-    getAgent,
-    condition,
+export const plantCrop = getAgent => {
+  const condition = state => {
+    return farmerHasFarm(getAgent)(state) && getItemByXYAndType(state.items)(getAgent(state))('grass');
+  };
+  return {
+    type: PLANT_CROP,
+    payload: {
+      getAgent,
+      condition,
+    }
   }
-});
+};
 
-export const moveTowardTarget = getAgent => getTarget => condition => ({
-  type: MOVE,
-  payload: {
-    getAgent,
-    getTarget,
-    condition,
+export const harvestCrop = getAgent => {
+  const condition = state => getItemByXYAndType(state.items)(getAgent(state))('crop');
+  return {
+    type: HARVEST_CROP,
+    payload: {
+      getAgent,
+      condition,
+    }
   }
-});
+};
 
-export const unloadResource = getAgent => condition => ({
-  type: UNLOAD_RESOURCE,
-  payload: {
-    getAgent,
-    condition,
+const moveCondition = getTarget => getAgent => state => {
+  const agent = getAgent(state);
+  const target = getTarget(state);
+  return agent && target && !(agent.x === target.x && agent.y === target.y);
+};
+
+export const moveTowardTarget = getAgent => getTarget => {
+  const condition = moveCondition(getTarget)(getAgent);
+  return {
+    type: MOVE,
+    payload: {
+      getAgent,
+      getTarget,
+      condition,
+    }
   }
-});
+};
+
+const unloadResourceCondition = getAgent => state => {
+  const agent = getAgent(state);
+  return agent.resources.length > 0 && getItemByXYAndType(state.items)(agent)('farm');
+};
+
+export const unloadResource = getAgent => {
+  const condition = unloadResourceCondition(getAgent);
+  return {
+    type: UNLOAD_RESOURCE,
+    payload: {
+      getAgent,
+      condition,
+    }
+  }
+};
 
 export const setActiveEvent = getAgent => event => ({
   type: SET_ACTIVE_EVENT,

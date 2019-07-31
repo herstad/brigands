@@ -8,3 +8,10 @@ export const move = (mover, direction) => {
   const {x, y} = direction(mover);
   return {...mover, x: (mover.x + x), y: (mover.y + y)}
 };
+
+export const calculateDistance = agent => target => Math.abs(agent.x - target.x) + Math.abs(agent.y - target.y);
+
+export const compareDistance = agent => (firstEl, secondEl) => {
+  const distance = calculateDistance(agent);
+  return distance(firstEl) - distance(secondEl);
+};
