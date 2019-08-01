@@ -43,7 +43,10 @@ function TurnButton() {
   );
 }
 
-const shouldDisplayOrder = action => state => !!action.payload.getAgent && unitHasAp(action.payload.getAgent)(state) && action.payload.condition(state);
+const shouldDisplayOrder = action => state => {
+  const {getAgent, condition} = action.payload;
+  return !!getAgent && unitHasAp(getAgent)(state) && condition(getAgent)(state);
+};
 
 function AttackButton({targetId}) {
   const {state, dispatch} = useContext(ReducerDispatch);

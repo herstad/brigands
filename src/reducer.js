@@ -112,21 +112,20 @@ const hasBehaviorForEvent = item => event => state => {
   return !!behavior.length;
 };
 
-// TODO remove original
-const getNextAction = state => conditionalActions => conditionalActions.find(conditionalAction => conditionalAction.condition(state));
+const getNextAction = getAgent => state => conditionalActions => conditionalActions.find(conditionalAction => conditionalAction.action.payload.condition(getAgent)(state));
 
 export const endTurn = () => ({type: END_TURN,});
 
+//TODO different range depending on type
+const attackCondition = getTarget => getAgent => state => calculateDistance(getAgent(state))(getTarget(state)) <= 1;
+
 export const attack = getAgent => getTarget => {
-  const range = 1;
-  //TODO different range depending on type
-  const condition = state => calculateDistance(getAgent(state))(getTarget(state)) <= range;
   return {
     type: ATTACK,
     payload: {
       getAgent,
       getTarget,
-      condition,
+      condition: attackCondition(getTarget),
     }
   }
 };
@@ -149,39 +148,38 @@ const farmerHasFarm = getAgent => state => {
   return state.items.some((item) => item.type === 'farm' && item.builderId === getAgent(state).id);
 };
 
+const farmCondition = getAgent => state => !farmerHasFarm(getAgent)(state) && getItemByXYAndType(state.items)(getAgent(state))('grass');
+
 export const buildFarm = getAgent => {
-  const condition = state => {
-    return !farmerHasFarm(getAgent)(state) && getItemByXYAndType(state.items)(getAgent(state))('grass');
-  };
   return {
     type: BUILD_FARM,
     payload: {
       getAgent,
-      condition,
+      condition: farmCondition,
     }
   }
 };
 
+const plantCropCondition = getAgent => state => farmerHasFarm(getAgent)(state) && getItemByXYAndType(state.items)(getAgent(state))('grass');
+
 export const plantCrop = getAgent => {
-  const condition = state => {
-    return farmerHasFarm(getAgent)(state) && getItemByXYAndType(state.items)(getAgent(state))('grass');
-  };
   return {
     type: PLANT_CROP,
     payload: {
       getAgent,
-      condition,
+      condition: plantCropCondition,
     }
   }
 };
 
+const harvestCropCondition = getAgent => state => getItemByXYAndType(state.items)(getAgent(state))('crop');
+
 export const harvestCrop = getAgent => {
-  const condition = state => getItemByXYAndType(state.items)(getAgent(state))('crop');
   return {
     type: HARVEST_CROP,
     payload: {
       getAgent,
-      condition,
+      condition: harvestCropCondition,
     }
   }
 };
@@ -193,7 +191,7 @@ const moveCondition = getTarget => getAgent => state => {
 };
 
 export const moveTowardTarget = getAgent => getTarget => {
-  const condition = moveCondition(getTarget)(getAgent);
+  const condition = moveCondition(getTarget);
   return {
     type: MOVE,
     payload: {
@@ -210,12 +208,11 @@ const unloadResourceCondition = getAgent => state => {
 };
 
 export const unloadResource = getAgent => {
-  const condition = unloadResourceCondition(getAgent);
   return {
     type: UNLOAD_RESOURCE,
     payload: {
       getAgent,
-      condition,
+      condition: unloadResourceCondition,
     }
   }
 };
@@ -248,7 +245,9 @@ export const restart = () => ({type: RESTART, payload: undefined});
 export const setSelectedItem = id => ({type: SET_SELECTED, payload: id});
 
 export const sleepOneTurn = getAgent => turn => {
-  const condition = state => state.turn <= turn;
+  //TODO refactor all conditions to accept getAgent
+  //TODO refactor conditionalAction to just be actions
+  const condition = getAgent => state => state.turn <= turn;
   return {
     type: SLEEP,
     payload: {
@@ -296,7 +295,7 @@ export default function reducer(state, action) {
       const {getAgent} = payload;
       const agent = getAgent(state);
       console.log(agent);
-      const nextAction = getNextAction(state)(agent.conditionalActions);
+      const nextAction = getNextAction(getAgent)(state)(agent.conditionalActions);
       //TODO unclear order of execution.
       return nextAction ? reducer(state, nextAction.action) : reducer(reducer(state, setUnitBehaviorAction(getAgent)), action);
     }
@@ -391,9 +390,20 @@ export default function reducer(state, action) {
       const agent = getAgent(state);
       const activeEvent = agent.events.length > 0 ? agent.events[0] : {type: 'DEFAULT_EVENT'};
       const conditionalActions = selectEventBehavior(agent.behaviorName)(activeEvent.type)(state);
+      const unitActions = conditionalActions.map(conditionalAction => {
+          return {
+            ...conditionalAction,
+            action: {
+              ...conditionalAction.action,
+              payload: {...conditionalAction.action.payload, getAgent}
+            }
+          }
+        }
+      );
 
       //TODO quickfix to stop endless recursion if there is no valid action for DEFAULT_EVENT
-      if (activeEvent.type === 'DEFAULT_EVENT' && !getNextAction(state)(conditionalActions)) {
+      console.log(unitActions);
+      if (activeEvent.type === 'DEFAULT_EVENT' && !getNextAction(getAgent)(state)(unitActions)) {
         return reducer(state, sleepOneTurn(getAgent)(state.turn));
       }
       console.log('Updated actions for event: ' + activeEvent.type);
@@ -401,7 +411,7 @@ export default function reducer(state, action) {
         ...agent,
         activeEvent,
         events: agent.events.slice(1),
-        conditionalActions: [...conditionalActions]
+        conditionalActions: [...unitActions]
       }, state);
     }
     case SLEEP: {

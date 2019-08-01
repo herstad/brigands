@@ -56,7 +56,7 @@ describe('reducer', () => {
   const agentId = dAgent.id;
   const getAgent = selectItemById(dAgent.id);
   const getTarget = selectItemById(dTarget.id);
-  const truthy = () => true;
+  const truthy = () => () => true;
 
   const fakeConditionalActions = [
     {action: {type: 'TEST_ACTION', payload: {condition: truthy}}, condition: truthy}
@@ -99,32 +99,33 @@ describe('reducer', () => {
     });
   });
   describe('AUTO_ACTION', () => {
-    const invalidId = 13;
-    const validId = 99;
-    const conditionalActionSelect = id => conditionOutcome => {
-      return {action: setSelectedItem(id), condition: () => conditionOutcome}
+    const invalidTurn = -1;
+    const validTurn = 0;
+    const conditionalActionSleep = turn => {
+      const action = sleepOneTurn(getAgent)(turn);
+      return {action, condition: action.payload.condition}
     };
 
-    const validConditionalActionSelect = () => conditionalActionSelect(validId)(true);
-    const invalidConditionalActionSelect = () => conditionalActionSelect(invalidId)(false);
+    const validConditionalActionSleep = () => conditionalActionSleep(validTurn);
+    const invalidConditionalActionSleep = () => conditionalActionSleep(invalidTurn);
 
     it('should perform next action', () => {
       const agent = {
         ...dAgent,
         conditionalActions: [
-          validConditionalActionSelect(),
+          validConditionalActionSleep(),
         ]
       };
-      const uState = reducer({items: [agent]}, autoAction(getAgent));
-      expect(uState.selectedId).toBe(validId);
+      const uState = reducer({...dState, items: [agent]}, autoAction(getAgent));
+      expect(getAgent(uState)).toHaveProperty('activeEvent.type', 'SLEEPING');
     });
     it('should skip invalid actions', () => {
       const agent = {
         ...dAgent,
-        conditionalActions: [invalidConditionalActionSelect(), validConditionalActionSelect()]
+        conditionalActions: [invalidConditionalActionSleep(), validConditionalActionSleep()]
       };
-      const uState = reducer({items: [agent]}, autoAction(getAgent));
-      expect(uState.selectedId).toBe(validId);
+      const uState = reducer({...dState, items: [agent]}, autoAction(getAgent));
+      expect(getAgent(uState)).toHaveProperty('activeEvent.type', 'SLEEPING');
     });
     it('should perform action from next event if no valid actions', () => {
       const uState = reducer(dState, setUnitBehaviorAction(getAgent));
