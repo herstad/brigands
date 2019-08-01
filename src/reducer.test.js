@@ -59,7 +59,7 @@ describe('reducer', () => {
   const truthy = () => () => true;
 
   const fakeConditionalActions = [
-    {action: {type: 'TEST_ACTION', payload: {condition: truthy}}, condition: truthy}
+    {type: 'TEST_ACTION', payload: {condition: truthy}}
   ];
 
   const fakeBehavior = eventType => ({
@@ -101,13 +101,9 @@ describe('reducer', () => {
   describe('AUTO_ACTION', () => {
     const invalidTurn = -1;
     const validTurn = 0;
-    const conditionalActionSleep = turn => {
-      const action = sleepOneTurn(getAgent)(turn);
-      return {action, condition: action.payload.condition}
-    };
 
-    const validConditionalActionSleep = () => conditionalActionSleep(validTurn);
-    const invalidConditionalActionSleep = () => conditionalActionSleep(invalidTurn);
+    const validConditionalActionSleep = () => sleepOneTurn(getAgent)(validTurn);
+    const invalidConditionalActionSleep = () => sleepOneTurn(getAgent)(invalidTurn);
 
     it('should perform next action', () => {
       const agent = {

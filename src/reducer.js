@@ -71,10 +71,9 @@ const consumeAp = (action, state) => {
   };
   // TODO rewrite without if
   if (!!selectedItem.training) {
-    const conditionalAction = {action, condition};
-    selectedItem.behaviorTraining.conditionalActions.push(conditionalAction);
+    selectedItem.behaviorTraining.conditionalActions.push(action);
   } else if (selectedItem.conditionalActions) {
-    const index = selectedItem.conditionalActions.findIndex(conditionalAction => conditionalAction.action.type === action.type);
+    const index = selectedItem.conditionalActions.findIndex(conditionalAction => conditionalAction.type === action.type);
     if (index > 0) {
       selectedItem.conditionalActions = selectedItem.conditionalActions.slice(index);
     }
@@ -112,7 +111,7 @@ const hasBehaviorForEvent = item => event => state => {
   return !!behavior.length;
 };
 
-const getNextAction = getAgent => state => conditionalActions => conditionalActions.find(conditionalAction => conditionalAction.action.payload.condition(getAgent)(state));
+const getNextAction = getAgent => state => conditionalActions => conditionalActions.find(conditionalAction => conditionalAction.payload.condition(getAgent)(state));
 
 export const endTurn = () => ({type: END_TURN,});
 
@@ -296,8 +295,8 @@ export default function reducer(state, action) {
       const agent = getAgent(state);
       console.log(agent);
       const nextAction = getNextAction(getAgent)(state)(agent.conditionalActions);
-      //TODO unclear order of execution.
-      return nextAction ? reducer(state, nextAction.action) : reducer(reducer(state, setUnitBehaviorAction(getAgent)), action);
+      //TODO unclear order of execution. use pipe
+      return nextAction ? reducer(state, nextAction) : reducer(reducer(state, setUnitBehaviorAction(getAgent)), action);
     }
     case RESTART: {
       const behaviors = state.behaviors;
@@ -393,10 +392,7 @@ export default function reducer(state, action) {
       const unitActions = conditionalActions.map(conditionalAction => {
           return {
             ...conditionalAction,
-            action: {
-              ...conditionalAction.action,
-              payload: {...conditionalAction.action.payload, getAgent}
-            }
+            payload: {...conditionalAction.payload, getAgent}
           }
         }
       );
@@ -420,7 +416,7 @@ export default function reducer(state, action) {
       return updateItem({
         ...agent,
         activeEvent: {type: 'SLEEPING'},
-        conditionalActions: [{action, condition: action.payload.condition}]
+        conditionalActions: [action]
       })(state)
     }
     default:
