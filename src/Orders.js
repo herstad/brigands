@@ -23,18 +23,9 @@ const unitHasAp = getAgent => state => {
   return item.ap > 0 && item.playerId === state.activePlayerId;
 };
 
-const getButtonColor = (type, state) => isSelectedAction(type, state) ? 'primary' : 'default';
-
 const playerItemsWithAp = (playerId) => (items) => {
   return getItemsByPlayer(playerId, items)
     .filter(item => item.ap > 0);
-};
-
-const getNextAction = state => conditionalActions => conditionalActions.find((conditionalAction) => conditionalAction.condition(state));
-
-const isSelectedAction = (type, state) => {
-  const conditionalAction = getNextAction(state)(selectSelectedItem(state).conditionalActions);
-  return conditionalAction && type === conditionalAction.action.type;
 };
 
 function TurnButton() {
@@ -62,9 +53,8 @@ function AttackButton({targetId}) {
   if (!shouldDisplayOrder(action)(state)) {
     return null;
   }
-  const color = getButtonColor('ATTACK', state);
   const handleAttack = () => dispatch(action);
-  return (<Button color={color} onClick={handleAttack}>Attack Enemy</Button>);
+  return (<Button onClick={handleAttack}>Attack Enemy</Button>);
 }
 
 const targetClosestType = getAgent => type => state => state.items.filter(item => item.type === type).sort(compareDistance(getAgent(state)))[0];
@@ -105,9 +95,8 @@ function MoveButton({getTarget, targetName,}) {
   if (!shouldDisplayOrder(action)(state)) {
     return null;
   }
-  const color = getButtonColor('MOVE', state);
   const handleMove = () => dispatch(action);
-  return (<Button color={color} onClick={handleMove}>Move To {targetName}</Button>);
+  return (<Button onClick={handleMove}>Move To {targetName}</Button>);
 }
 
 function BuildFarmButton() {
@@ -119,7 +108,7 @@ function BuildFarmButton() {
     return null;
   }
   const handleBuildFarm = () => dispatch(action);
-  return (<Button color='default' onClick={handleBuildFarm}>Build farm</Button>);
+  return (<Button onClick={handleBuildFarm}>Build farm</Button>);
 }
 
 function PlantCropButton() {
@@ -131,7 +120,7 @@ function PlantCropButton() {
     return null;
   }
   const handlePlantCrop = () => dispatch(action);
-  return (<Button color='default' onClick={handlePlantCrop}>PlantCrop</Button>);
+  return (<Button onClick={handlePlantCrop}>PlantCrop</Button>);
 }
 
 function HarvestCropButton() {
@@ -143,7 +132,7 @@ function HarvestCropButton() {
     return null;
   }
   const handleHarvestCrop = () => dispatch(action);
-  return (<Button color='default' onClick={handleHarvestCrop}>HarvestCrop</Button>);
+  return (<Button onClick={handleHarvestCrop}>HarvestCrop</Button>);
 }
 
 function UnloadResourceButton() {
@@ -154,7 +143,7 @@ function UnloadResourceButton() {
     return null;
   }
   const handleUnload = () => dispatch(action);
-  return (<Button color='default' onClick={handleUnload}>Unload Resource</Button>);
+  return (<Button onClick={handleUnload}>Unload Resource</Button>);
 }
 
 export default function Orders() {
