@@ -28,6 +28,7 @@ export const SET_SELECTED = 'brigands/reducer/SET_SELECTED';
 export const SET_UNIT_BEHAVIOR = 'brigands/reducer/SET_UNIT_BEHAVIOR';
 export const TRAIN_EVENT = 'brigands/reducer/TRAIN_EVENT';
 export const UNLOAD_RESOURCE = 'brigands/reducer/UNLOAD_RESOURCE';
+export const SLEEP = 'brigands/reducer/SLEEP';
 
 export const selectItemById = id => state => getItemById(id, state.items);
 
@@ -246,6 +247,17 @@ export const restart = () => ({type: RESTART, payload: undefined});
 
 export const setSelectedItem = id => ({type: SET_SELECTED, payload: id});
 
+export const sleepOneTurn = getAgent => turn => {
+  const condition = state => state.turn <= turn;
+  return {
+    type: SLEEP,
+    payload: {
+      getAgent,
+      condition
+    }
+  };
+};
+
 export default function reducer(state, action) {
   console.log('Action');
   console.log(action);
@@ -334,8 +346,6 @@ export default function reducer(state, action) {
       const updatedTarget = {...target, resources: [...target.resources, agent.resources[0]]};
       const updatedAgent = {...agent, resources: agent.resources.slice(1)};
       return pipe(updateItem(updatedAgent), updateItem(updatedTarget), postAction(action))(state);
-      // return updateItemById(updatedTarget, updateItemById(updatedAgent, consumeAp(action,
-      // state)));
     }
     case TRAIN_EVENT: {
       const {getAgent, event} = payload;
@@ -377,17 +387,14 @@ export default function reducer(state, action) {
     }
     case SET_UNIT_BEHAVIOR: {
       //TODO call SET_ACTIVE_EVENT or refactor
-      const agent = payload.getAgent(state);
+      const {getAgent} = payload;
+      const agent = getAgent(state);
       const activeEvent = agent.events.length > 0 ? agent.events[0] : {type: 'DEFAULT_EVENT'};
       const conditionalActions = selectEventBehavior(agent.behaviorName)(activeEvent.type)(state);
 
       //TODO quickfix to stop endless recursion if there is no valid action for DEFAULT_EVENT
       if (activeEvent.type === 'DEFAULT_EVENT' && !getNextAction(state)(conditionalActions)) {
-        return updateItem({
-          ...agent,
-          activeEvent: {type: 'SLEEPING'},
-          conditionalActions: [{action: {type: 'SLEEP', payload: {}}, condition: () => true}]
-        })(state)
+        return reducer(state, sleepOneTurn(getAgent)(state.turn));
       }
       console.log('Updated actions for event: ' + activeEvent.type);
       return updateItemById({
@@ -396,6 +403,15 @@ export default function reducer(state, action) {
         events: agent.events.slice(1),
         conditionalActions: [...conditionalActions]
       }, state);
+    }
+    case SLEEP: {
+      const {getAgent} = payload;
+      const agent = getAgent(state);
+      return updateItem({
+        ...agent,
+        activeEvent: {type: 'SLEEPING'},
+        conditionalActions: [{action, condition: action.payload.condition}]
+      })(state)
     }
     default:
       return state;

@@ -12,6 +12,7 @@ import reducer, {
   setActiveEvent,
   setSelectedItem,
   setUnitBehaviorAction,
+  sleepOneTurn,
   trainEventBehavior,
   unloadResource
 } from "./reducer";
@@ -277,5 +278,11 @@ describe('reducer', () => {
       expect(getAgent(uState)).toHaveProperty('resources', []);
     });
   });
+  describe('SLEEP', () => {
+    it('should sleep one turn', () => {
+      const uState = reducer(dState, sleepOneTurn(getAgent)(0));
+      expect(getAgent(uState)).toHaveProperty('activeEvent.type', 'SLEEPING');
+    })
+  })
 
 });
