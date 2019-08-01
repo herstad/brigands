@@ -51,7 +51,7 @@ const shouldDisplayOrder = action => state => {
 function AttackButton({targetId}) {
   const {state, dispatch} = useContext(ReducerDispatch);
   const getAgent = selectItemById(state.selectedId);
-  const getTarget = selectItemById(targetId);
+  const getTarget = () => selectItemById(targetId);
   const action = attack(getAgent)(getTarget);
   if (!shouldDisplayOrder(action)(state)) {
     return null;
@@ -60,35 +60,27 @@ function AttackButton({targetId}) {
   return (<Button onClick={handleAttack}>Attack Enemy</Button>);
 }
 
-const targetClosestType = getAgent => type => state => state.items.filter(item => item.type === type).sort(compareDistance(getAgent(state)))[0];
+const targetClosestType = type => getAgent => state => state.items.filter(item => item.type === type).sort(compareDistance(getAgent(state)))[0];
 
 //TODO separate item type and if it is a home. hardcoding 'farm' as that is the only home type
 const targetHome = getAgent => state => state.items.filter(item => item.type === 'farm' && item.builderId === getAgent(state).id)[0];
 
 function MoveToGrassButton() {
-  const {state} = useContext(ReducerDispatch);
-  const getAgent = selectItemById(state.selectedId);
-  const getTarget = targetClosestType(getAgent)('grass');
+  const getTarget = targetClosestType('grass');
   return (<MoveButton getTarget={getTarget} targetName={'Grass'}/>);
 }
 
-const getActiveEvent = getAgent => state => {
+const getActiveEventTarget = getAgent => state => {
   const {activeEvent} = getAgent(state);
   return selectItemById(activeEvent.itemId)(state);
 };
 
 function MoveToEventButton() {
-  const {state} = useContext(ReducerDispatch);
-  const getAgent = selectItemById(state.selectedId);
-  const getTarget = getActiveEvent(getAgent);
-  return (<MoveButton getTarget={getTarget} targetName={'Event'}/>);
+  return (<MoveButton getTarget={getActiveEventTarget} targetName={'Event'}/>);
 }
 
 function MoveToHomeButton() {
-  const {state} = useContext(ReducerDispatch);
-  const getAgent = selectItemById(state.selectedId);
-  const getTarget = targetHome(getAgent);
-  return (<MoveButton getTarget={getTarget} targetName={'Home'}/>);
+  return (<MoveButton getTarget={targetHome} targetName={'Home'}/>);
 }
 
 function MoveButton({getTarget, targetName,}) {

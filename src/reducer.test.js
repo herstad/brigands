@@ -55,7 +55,7 @@ describe('reducer', () => {
   };
   const agentId = dAgent.id;
   const getAgent = selectItemById(dAgent.id);
-  const getTarget = selectItemById(dTarget.id);
+  const getTarget = () => selectItemById(dTarget.id);
   const truthy = () => () => true;
 
   const fakeConditionalActions = [
@@ -85,7 +85,7 @@ describe('reducer', () => {
     it('should reduce hp of target', () => {
       const uState = reducer(dState, attack(getAgent)(getTarget));
       const uAgent = getAgent(uState);
-      const uTarget = getTarget(uState);
+      const uTarget = getTarget()(uState);
       expect(uAgent.ap).toBe(0);
       expect(uTarget.hp).toBe(4);
     });
@@ -93,7 +93,7 @@ describe('reducer', () => {
       const state = {items: [dAgent, {...dTarget, y: 2}]};
       const uState = reducer(state, attack(getAgent)(getTarget));
       const uAgent = getAgent(uState);
-      const uTarget = getTarget(uState);
+      const uTarget = getTarget()(uState);
       expect(uAgent.ap).toBe(1);
       expect(uTarget.hp).toBe(5);
     });

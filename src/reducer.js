@@ -117,7 +117,7 @@ const getNextAction = getAgent => state => conditionalActions => conditionalActi
 export const endTurn = () => ({type: END_TURN,});
 
 //TODO different range depending on type
-const attackCondition = getTarget => getAgent => state => calculateDistance(getAgent(state))(getTarget(state)) <= 1;
+const attackCondition = getTarget => getAgent => state => calculateDistance(getAgent(state))(getTarget(getAgent)(state)) <= 1;
 
 export const attack = getAgent => getTarget => {
   return {
@@ -186,7 +186,7 @@ export const harvestCrop = getAgent => {
 
 const moveCondition = getTarget => getAgent => state => {
   const agent = getAgent(state);
-  const target = getTarget(state);
+  const target = getTarget(getAgent)(state);
   return agent && target && !(agent.x === target.x && agent.y === target.y);
 };
 
@@ -309,7 +309,7 @@ export default function reducer(state, action) {
     case ATTACK: {
       const {getAgent, getTarget} = payload;
       const attacker = getAgent(state);
-      const target = getTarget(state);
+      const target = getTarget(getAgent)(state);
 
       if (!inRange(attacker, target)) {
         console.log('target not in range!');
@@ -320,7 +320,7 @@ export default function reducer(state, action) {
     }
     case MOVE: {
       const {getAgent, getTarget} = payload;
-      const moveAgent = (s) => updateItem(move(getAgent(s), toward(getTarget(s))))(s);
+      const moveAgent = (s) => updateItem(move(getAgent(s), toward(getTarget(getAgent)(s))))(s);
       return pipe(moveAgent, postAction(action))(state);
     }
     case BUILD_FARM: {
