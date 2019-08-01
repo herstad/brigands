@@ -18,9 +18,8 @@ import {
 } from "./reducer";
 import {compareDistance} from "./movement";
 
-//TODO replace id with getAgent
-const unitHasAp = id => state => {
-  const item = selectItemById(id)(state);
+const unitHasAp = getAgent => state => {
+  const item = getAgent(state);
   return item.ap > 0 && item.playerId === state.activePlayerId;
 };
 
@@ -53,20 +52,21 @@ function TurnButton() {
   );
 }
 
-const shouldDisplayOrder = id => condition => state => unitHasAp(id)(state) && condition(state);
+const shouldDisplayOrder = action => state => !!action.payload.getAgent && unitHasAp(action.payload.getAgent)(state) && action.payload.condition(state);
 
 function AttackButton({targetId}) {
   const {state, dispatch} = useContext(ReducerDispatch);
   const getAgent = selectItemById(state.selectedId);
   const getTarget = selectItemById(targetId);
   const action = attack(getAgent)(getTarget);
-  if (!shouldDisplayOrder(state.selectedId)(action.payload.condition)(state)) {
+  if (!shouldDisplayOrder(action)(state)) {
     return null;
   }
   const color = getButtonColor('ATTACK', state);
   const handleAttack = () => dispatch(action);
   return (<Button color={color} onClick={handleAttack}>Attack Enemy</Button>);
 }
+
 const targetClosestType = getAgent => type => state => state.items.filter(item => item.type === type).sort(compareDistance(getAgent(state)))[0];
 
 //TODO separate item type and if it is a home. hardcoding 'farm' as that is the only home type
@@ -102,7 +102,7 @@ function MoveButton({getTarget, targetName,}) {
   const {state, dispatch} = useContext(ReducerDispatch);
   const getAgent = selectItemById(state.selectedId);
   const action = moveTowardTarget(getAgent)(getTarget);
-  if (!shouldDisplayOrder(state.selectedId)(action.payload.condition)(state)) {
+  if (!shouldDisplayOrder(action)(state)) {
     return null;
   }
   const color = getButtonColor('MOVE', state);
@@ -115,7 +115,7 @@ function BuildFarmButton() {
   const agent = selectSelectedItem(state);
   const getAgent = selectItemById(agent.id);
   const action = buildFarm(getAgent);
-  if (!shouldDisplayOrder(agent.id)(action.payload.condition)(state)) {
+  if (!shouldDisplayOrder(action)(state)) {
     return null;
   }
   const handleBuildFarm = () => dispatch(action);
@@ -127,7 +127,7 @@ function PlantCropButton() {
   const agent = selectSelectedItem(state);
   const getAgent = selectItemById(agent.id);
   const action = plantCrop(getAgent);
-  if (!shouldDisplayOrder(agent.id)(action.payload.condition)(state)) {
+  if (!shouldDisplayOrder(action)(state)) {
     return null;
   }
   const handlePlantCrop = () => dispatch(action);
@@ -139,7 +139,7 @@ function HarvestCropButton() {
   const agent = selectSelectedItem(state);
   const getAgent = selectItemById(agent.id);
   const action = harvestCrop(getAgent);
-  if (!shouldDisplayOrder(agent.id)(action.payload.condition)(state)) {
+  if (!shouldDisplayOrder(action)(state)) {
     return null;
   }
   const handleHarvestCrop = () => dispatch(action);
@@ -150,7 +150,7 @@ function UnloadResourceButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
   const getAgent = selectItemById(state.selectedId);
   const action = unloadResource(getAgent);
-  if (!shouldDisplayOrder(state.selectedId)(action.payload.condition)(state)) {
+  if (!shouldDisplayOrder(action)(state)) {
     return null;
   }
   const handleUnload = () => dispatch(action);
