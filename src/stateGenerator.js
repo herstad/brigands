@@ -51,7 +51,7 @@ const generateItems = (size = 10) => {
       type: 'o',
       playerId: 'ai',
       ap: 1,
-      behaviorName: 'farmer',
+      behaviorName: 'brigand',
       conditionalActions: [],
       events: [],
       activeEvent: {type: 'DEFAULT_EVENT'},
