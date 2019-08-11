@@ -2,6 +2,7 @@ import reducer, {
   attack,
   autoAction,
   buildFarm,
+  buildWarehouse,
   endTurn,
   finishTrainEventBehavior,
   harvestCrop,
@@ -137,6 +138,18 @@ describe('reducer', () => {
     it('should consume ap', () => {
       const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
       const uState = reducer(state, buildFarm(getAgent));
+      expect(getAgent(uState)).toHaveProperty('ap', 0);
+    });
+  });
+  describe('BUILD_WAREHOUSE', () => {
+    it('should build warehouse', () => {
+      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
+      const uState = reducer(state, buildWarehouse(getAgent));
+      expect(findItemByType(uState.items)('warehouse')).toHaveProperty('builderId', agentId);
+    });
+    it('should consume ap', () => {
+      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
+      const uState = reducer(state, buildWarehouse(getAgent));
       expect(getAgent(uState)).toHaveProperty('ap', 0);
     });
   });

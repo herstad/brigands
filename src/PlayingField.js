@@ -20,6 +20,7 @@ const typeIcons = {
   farm: 'home',
   crop: 'local_florist',
   planted: 'minimize',
+  warehouse: 'layers',
 
 };
 

@@ -17,6 +17,7 @@ import {pipe} from "./functional";
 export const ATTACK = 'brigands/reducer/ATTACK';
 export const AUTO_ACTION = 'brigands/reducer/AUTO_ACTION';
 export const BUILD_FARM = 'brigands/reducer/BUILD_FARM';
+export const BUILD_WAREHOUSE = 'brigands/reducer/BUILD_WAREHOUSE';
 export const END_TURN = 'brigands/reducer/END_TURN';
 export const FINISH_TRAIN_EVENT = 'brigands/reducer/FINISH_TRAIN_EVENT';
 export const HARVEST_CROP = 'brigands/reducer/HARVEST_CROP';
@@ -142,6 +143,20 @@ export const autoAction = getAgent => ({
     getAgent,
   }
 });
+
+const buildingTypeExists = type => getAgent => state => {
+  return !state.items.some((item) => item.type === type) && getItemByXYAndType(state.items)(getAgent(state))('grass');
+};
+
+export const buildWarehouse = getAgent => {
+  return {
+    type: BUILD_WAREHOUSE,
+    payload: {
+      getAgent,
+      condition: buildingTypeExists('warehouse'),
+    }
+  }
+};
 
 const farmerHasFarm = getAgent => state => {
   return state.items.some((item) => item.type === 'farm' && item.builderId === getAgent(state).id);
@@ -324,6 +339,9 @@ export default function reducer(state, action) {
     }
     case BUILD_FARM: {
       return createBuilding(payload.getAgent, 'farm', consumeAp(action, state));
+    }
+    case BUILD_WAREHOUSE: {
+      return createBuilding(payload.getAgent, 'warehouse', consumeAp(action, state));
     }
     case PLANT_CROP: {
       return createBuilding(payload.getAgent, 'planted', consumeAp(action, state));

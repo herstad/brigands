@@ -8,6 +8,7 @@ import {
   attack,
   autoAction,
   buildFarm,
+  buildWarehouse,
   endTurn,
   harvestCrop,
   moveTowardTarget,
@@ -28,13 +29,13 @@ const playerItemsWithAp = (playerId) => (items) => {
     .filter(item => item.ap > 0);
 };
 
-function OrderButton({action, orderText}) {
+function OrderButton({action, children}) {
   const {state, dispatch} = useContext(ReducerDispatch);
   if (!shouldDisplayOrder(action)(state)) {
     return null;
   }
   const handleAction = () => dispatch(action);
-  return (<Button onClick={handleAction}>{orderText}</Button>);
+  return (<Button onClick={handleAction}>{children}</Button>);
 }
 
 function TurnButton() {
@@ -62,7 +63,7 @@ function AttackButton({targetId}) {
   const getAgent = selectItemById(state.selectedId);
   const getTarget = () => selectItemById(targetId);
   const action = attack(getAgent)(getTarget);
-  return (<OrderButton action={action} orderText="Attack Enemy"/>);
+  return (<OrderButton action={action}>Attack Enemy</OrderButton>);
 }
 
 const targetClosestType = type => getAgent => state => state.items.filter(item => item.type === type).sort(compareDistance(getAgent(state)))[0];
@@ -92,8 +93,15 @@ function MoveButton({getTarget, targetName,}) {
   const {state} = useContext(ReducerDispatch);
   const getAgent = selectItemById(state.selectedId);
   const action = moveTowardTarget(getAgent)(getTarget);
-  const orderText = `Move To ${targetName}`;
-  return (<OrderButton action={action} orderText={orderText}/>);
+  return (<OrderButton action={action}>Move To {targetName}</OrderButton>);
+}
+
+function BuildWarehouseButton() {
+  const {state} = useContext(ReducerDispatch);
+  const agent = selectSelectedItem(state);
+  const getAgent = selectItemById(agent.id);
+  const action = buildWarehouse(getAgent);
+  return (<OrderButton action={action}>Build warehouse</OrderButton>);
 }
 
 function BuildFarmButton() {
@@ -101,7 +109,7 @@ function BuildFarmButton() {
   const agent = selectSelectedItem(state);
   const getAgent = selectItemById(agent.id);
   const action = buildFarm(getAgent);
-  return (<OrderButton action={action} orderText="Build farm"/>);
+  return (<OrderButton action={action}>Build farm</OrderButton>);
 }
 
 function PlantCropButton() {
@@ -109,7 +117,7 @@ function PlantCropButton() {
   const agent = selectSelectedItem(state);
   const getAgent = selectItemById(agent.id);
   const action = plantCrop(getAgent);
-  return (<OrderButton action={action} orderText="PlantCrop"/>);
+  return (<OrderButton action={action}>PlantCrop</OrderButton>);
 }
 
 function HarvestCropButton() {
@@ -117,14 +125,14 @@ function HarvestCropButton() {
   const agent = selectSelectedItem(state);
   const getAgent = selectItemById(agent.id);
   const action = harvestCrop(getAgent);
-  return (<OrderButton action={action} orderText="HarvestCrop"/>);
+  return (<OrderButton action={action}>HarvestCrop</OrderButton>);
 }
 
 function UnloadResourceButton() {
   const {state} = useContext(ReducerDispatch);
   const getAgent = selectItemById(state.selectedId);
   const action = unloadResource(getAgent);
-  return (<OrderButton action={action} orderText="Unload Resource"/>);
+  return (<OrderButton action={action}>Unload Resource</OrderButton>);
 }
 
 export default function Orders() {
@@ -139,6 +147,7 @@ export default function Orders() {
         <MoveToGrassButton/>
         <MoveToEventButton/>
         <MoveToHomeButton/>
+        <BuildWarehouseButton/>
         <BuildFarmButton/>
         <PlantCropButton/>
         <HarvestCropButton/>
