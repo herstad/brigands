@@ -218,7 +218,8 @@ export const moveTowardTarget = getAgent => getTarget => {
 
 const unloadResourceCondition = getAgent => state => {
   const agent = getAgent(state);
-  return agent.resources.length > 0 && getItemByXYAndType(state.items)(agent)('farm');
+  const getByType = getItemByXYAndType(state.items)(agent);
+  return agent.resources.length > 0 && (getByType('farm') || getByType('warehouse'));
 };
 
 export const unloadResource = getAgent => {
@@ -357,8 +358,8 @@ export default function reducer(state, action) {
     }
     case UNLOAD_RESOURCE: {
       const agent = payload.getAgent(state);
-      //TODO hardcoded farm as that is the only home type
-      const target = getItemByXYAndType(state.items)(agent)('farm');
+      const getByType = getItemByXYAndType(state.items)(agent);
+      const target = getByType('farm') || getByType('warehouse');
       const updatedTarget = {...target, resources: [...target.resources, agent.resources[0]]};
       const updatedAgent = {...agent, resources: agent.resources.slice(1)};
       return pipe(updateItem(updatedAgent), updateItem(updatedTarget), postAction(action))(state);

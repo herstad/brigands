@@ -69,6 +69,18 @@ const generateItems = (size = 10) => {
       activeEvent: {type: 'DEFAULT_EVENT'},
       resources: [],
     },
+    {
+      id: generateId(),
+      hp: 5,
+      type: 'x',
+      playerId: 'human',
+      ap: 1,
+      behaviorName: 'hauler',
+      conditionalActions: [],
+      events: [],
+      activeEvent: {type: 'DEFAULT_EVENT'},
+      resources: [],
+    },
   ];
 
   const items = [

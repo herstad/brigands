@@ -269,20 +269,26 @@ describe('reducer', () => {
     });
   });
   describe('UNLOAD_RESOURCE', () => {
+    const stateWithBuilding = buildingType => ({
+      ...dState,
+      items: [
+        {...dAgent, resources: ['crop']},
+        {
+          ...dAgent,
+          id: 99,
+          builderId: dAgent.id,
+          type: buildingType,
+          resources: []
+        }]
+    });
     it('should unload resource from agent to home', () => {
-      const state = {
-        ...dState,
-        items: [
-          {...dAgent, resources: ['crop']},
-          {
-            ...dAgent,
-            id: 99,
-            builderId: dAgent.id,
-            type: 'farm',
-            resources: []
-          }]
-      };
-
+      const state = stateWithBuilding('farm');
+      const uState = reducer(state, unloadResource(getAgent));
+      expect(getItemById(99, uState.items)).toHaveProperty('resources', ['crop']);
+      expect(getAgent(uState)).toHaveProperty('resources', []);
+    });
+    it('should unload resource from agent to warehouse', () => {
+      const state = stateWithBuilding('warehouse');
       const uState = reducer(state, unloadResource(getAgent));
       expect(getItemById(99, uState.items)).toHaveProperty('resources', ['crop']);
       expect(getAgent(uState)).toHaveProperty('resources', []);
