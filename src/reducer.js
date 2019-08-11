@@ -13,6 +13,7 @@ import {
 } from "./itemsUtil";
 import {calculateDistance, move, toward} from "./movement";
 import {pipe} from "./functional";
+import {CROP, FARM, GRASS, PLANTED, WAREHOUSE} from "./itemTypes";
 
 export const ATTACK = 'brigands/reducer/ATTACK';
 export const AUTO_ACTION = 'brigands/reducer/AUTO_ACTION';
@@ -86,7 +87,7 @@ const postAction = action => state => consumeAp(action, state);
 
 const createBuilding = (getAgent, type, state) => {
   const builder = getAgent(state);
-  const target = getItemByXYAndType(state.items)(builder)('grass');
+  const target = getItemByXYAndType(state.items)(builder)(GRASS);
   return createBuildingOn(getAgent)(type)(target.id)(state);
 };
 
@@ -105,7 +106,7 @@ const createBuildingOn = getAgent => buildingType => targetId => state => {
   return {...state, items: [...clearedItems, building]}
 };
 
-const plantedShouldGrow = turn => item => item.type === 'planted' && item.createdTurn + 5 <= turn;
+const plantedShouldGrow = turn => item => item.type === PLANTED && item.createdTurn + 5 <= turn;
 
 const hasBehaviorForEvent = item => event => state => {
   const behavior = selectEventBehavior(item.behaviorName)(event.type)(state);
@@ -145,7 +146,7 @@ export const autoAction = getAgent => ({
 });
 
 const buildingTypeExists = type => getAgent => state => {
-  return !state.items.some((item) => item.type === type) && getItemByXYAndType(state.items)(getAgent(state))('grass');
+  return !state.items.some((item) => item.type === type) && getItemByXYAndType(state.items)(getAgent(state))(GRASS);
 };
 
 export const buildWarehouse = getAgent => {
@@ -153,16 +154,16 @@ export const buildWarehouse = getAgent => {
     type: BUILD_WAREHOUSE,
     payload: {
       getAgent,
-      condition: buildingTypeExists('warehouse'),
+      condition: buildingTypeExists(WAREHOUSE),
     }
   }
 };
 
 const farmerHasFarm = getAgent => state => {
-  return state.items.some((item) => item.type === 'farm' && item.builderId === getAgent(state).id);
+  return state.items.some((item) => item.type === FARM && item.builderId === getAgent(state).id);
 };
 
-const farmCondition = getAgent => state => !farmerHasFarm(getAgent)(state) && getItemByXYAndType(state.items)(getAgent(state))('grass');
+const farmCondition = getAgent => state => !farmerHasFarm(getAgent)(state) && getItemByXYAndType(state.items)(getAgent(state))(GRASS);
 
 export const buildFarm = getAgent => {
   return {
@@ -174,7 +175,7 @@ export const buildFarm = getAgent => {
   }
 };
 
-const plantCropCondition = getAgent => state => farmerHasFarm(getAgent)(state) && getItemByXYAndType(state.items)(getAgent(state))('grass');
+const plantCropCondition = getAgent => state => farmerHasFarm(getAgent)(state) && getItemByXYAndType(state.items)(getAgent(state))(GRASS);
 
 export const plantCrop = getAgent => {
   return {
@@ -186,7 +187,7 @@ export const plantCrop = getAgent => {
   }
 };
 
-const harvestCropCondition = getAgent => state => getItemByXYAndType(state.items)(getAgent(state))('crop');
+const harvestCropCondition = getAgent => state => getItemByXYAndType(state.items)(getAgent(state))(CROP);
 
 export const harvestCrop = getAgent => {
   return {
@@ -219,7 +220,7 @@ export const moveTowardTarget = getAgent => getTarget => {
 const unloadResourceCondition = getAgent => state => {
   const agent = getAgent(state);
   const getByType = getItemByXYAndType(state.items)(agent);
-  return agent.resources.length > 0 && (getByType('farm') || getByType('warehouse'));
+  return agent.resources.length > 0 && (getByType(FARM) || getByType(WAREHOUSE));
 };
 
 export const unloadResource = getAgent => {
@@ -280,7 +281,7 @@ export default function reducer(state, action) {
     case END_TURN: {
       const apItems = updateItems((item) => isPlayer(selectActivePlayerId(state), item))({ap: 1})(state.items);
       const grownCrops = apItems.filter(plantedShouldGrow(state.turn));
-      const newCrops = updateItems(plantedShouldGrow(state.turn))({type: 'crop',})(grownCrops);
+      const newCrops = updateItems(plantedShouldGrow(state.turn))({type: CROP,})(grownCrops);
       let items = replaceItems(apItems)(newCrops);
       const cropEvents = newCrops.map((item) => ({
         id: generateId(),
@@ -339,27 +340,27 @@ export default function reducer(state, action) {
       return pipe(moveAgent, postAction(action))(state);
     }
     case BUILD_FARM: {
-      return createBuilding(payload.getAgent, 'farm', consumeAp(action, state));
+      return createBuilding(payload.getAgent, FARM, consumeAp(action, state));
     }
     case BUILD_WAREHOUSE: {
-      return createBuilding(payload.getAgent, 'warehouse', consumeAp(action, state));
+      return createBuilding(payload.getAgent, WAREHOUSE, consumeAp(action, state));
     }
     case PLANT_CROP: {
-      return createBuilding(payload.getAgent, 'planted', consumeAp(action, state));
+      return createBuilding(payload.getAgent, PLANTED, consumeAp(action, state));
     }
     case HARVEST_CROP: {
       const agent = payload.getAgent(state);
-      const target = getItemByXYAndType(state.items)(agent)('crop');
+      const target = getItemByXYAndType(state.items)(agent)(CROP);
       const addedResourceState = updateItemById({
         ...agent,
-        resources: [...agent.resources, 'crop']
+        resources: [...agent.resources, CROP]
       }, state);
-      return createBuildingOn(payload.getAgent)('grass')(target.id)(consumeAp(action, addedResourceState));
+      return createBuildingOn(payload.getAgent)(GRASS)(target.id)(consumeAp(action, addedResourceState));
     }
     case UNLOAD_RESOURCE: {
       const agent = payload.getAgent(state);
       const getByType = getItemByXYAndType(state.items)(agent);
-      const target = getByType('farm') || getByType('warehouse');
+      const target = getByType(FARM) || getByType(WAREHOUSE);
       const updatedTarget = {...target, resources: [...target.resources, agent.resources[0]]};
       const updatedAgent = {...agent, resources: agent.resources.slice(1)};
       return pipe(updateItem(updatedAgent), updateItem(updatedTarget), postAction(action))(state);

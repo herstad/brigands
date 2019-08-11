@@ -18,6 +18,7 @@ import {
   unloadResource
 } from "./reducer";
 import {compareDistance} from "./movement";
+import {FARM, GRASS, WAREHOUSE} from "./itemTypes";
 
 const unitHasAp = getAgent => state => {
   const item = getAgent(state);
@@ -69,10 +70,10 @@ function AttackButton({targetId}) {
 const targetClosestType = type => getAgent => state => state.items.filter(item => item.type === type).sort(compareDistance(getAgent(state)))[0];
 
 //TODO separate item type and if it is a home. hardcoding 'farm' as that is the only home type
-const targetHome = getAgent => state => state.items.filter(item => item.type === 'farm' && item.builderId === getAgent(state).id)[0];
+const targetHome = getAgent => state => state.items.filter(item => item.type === FARM && item.builderId === getAgent(state).id)[0];
 
 function MoveToGrassButton() {
-  const getTarget = targetClosestType('grass');
+  const getTarget = targetClosestType(GRASS);
   return (<MoveButton getTarget={getTarget} targetName={'Grass'}/>);
 }
 
@@ -90,7 +91,7 @@ function MoveToHomeButton() {
 }
 
 function MoveToWarehouseButton() {
-  return (<MoveButton getTarget={targetClosestType('warehouse')} targetName={'Warehouse'}/>);
+  return (<MoveButton getTarget={targetClosestType(WAREHOUSE)} targetName={'Warehouse'}/>);
 }
 
 function MoveButton({getTarget, targetName,}) {

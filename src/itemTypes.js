@@ -1,0 +1,12 @@
+export const HUMAN = 'o';
+export const ENEMY = 'x';
+export const MOUNTED = 'mounted';
+export const GRASS = 'grass';
+export const TREE = 'tree';
+export const WATER = 'water';
+export const ROCK = 'rock';
+export const DEAD = 'dead';
+export const FARM = 'farm';
+export const CROP = 'crop';
+export const PLANTED = 'planted';
+export const WAREHOUSE = 'warehouse';

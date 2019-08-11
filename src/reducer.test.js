@@ -19,11 +19,12 @@ import reducer, {
 } from "./reducer";
 import {findItemByType, getItemById} from "./itemsUtil";
 import {PLAYERS} from "./stateGenerator";
+import {CROP, ENEMY, FARM, GRASS, HUMAN, PLANTED, WAREHOUSE} from "./itemTypes";
 
 describe('reducer', () => {
   const dAgent = {
     id: 0,
-    type: 'x',
+    type: ENEMY,
     playerId: 'human',
     ap: 1,
     x: 0,
@@ -36,7 +37,7 @@ describe('reducer', () => {
   };
   const dTarget = {
     id: 1,
-    type: 'o',
+    type: HUMAN,
     playerId: 'ai',
     ap: 1,
     x: 0,
@@ -131,24 +132,24 @@ describe('reducer', () => {
   });
   describe('BUILD_FARM', () => {
     it('should build farm', () => {
-      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
+      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: GRASS}]};
       const uState = reducer(state, buildFarm(getAgent));
-      expect(findItemByType(uState.items)('farm')).toHaveProperty('builderId', agentId);
+      expect(findItemByType(uState.items)(FARM)).toHaveProperty('builderId', agentId);
     });
     it('should consume ap', () => {
-      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
+      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: GRASS}]};
       const uState = reducer(state, buildFarm(getAgent));
       expect(getAgent(uState)).toHaveProperty('ap', 0);
     });
   });
   describe('BUILD_WAREHOUSE', () => {
     it('should build warehouse', () => {
-      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
+      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: GRASS}]};
       const uState = reducer(state, buildWarehouse(getAgent));
-      expect(findItemByType(uState.items)('warehouse')).toHaveProperty('builderId', agentId);
+      expect(findItemByType(uState.items)(WAREHOUSE)).toHaveProperty('builderId', agentId);
     });
     it('should consume ap', () => {
-      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
+      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: GRASS}]};
       const uState = reducer(state, buildWarehouse(getAgent));
       expect(getAgent(uState)).toHaveProperty('ap', 0);
     });
@@ -196,10 +197,10 @@ describe('reducer', () => {
   });
   describe('HARVEST_CROP', () => {
     it('should plant crop', () => {
-      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'crop'}]};
+      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: CROP}]};
       const uState = reducer(state, harvestCrop(getAgent));
-      expect(findItemByType(uState.items)('crop')).toBe(undefined);
-      expect(getAgent(uState)).toHaveProperty('resources', ['crop']);
+      expect(findItemByType(uState.items)(CROP)).toBe(undefined);
+      expect(getAgent(uState)).toHaveProperty('resources', [CROP]);
     });
   });
   describe('MOVE', () => {
@@ -210,9 +211,9 @@ describe('reducer', () => {
   });
   describe('PLANT_CROP', () => {
     it('should plant crop', () => {
-      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: 'grass'}]};
+      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: GRASS}]};
       const uState = reducer(state, plantCrop(getAgent));
-      expect(findItemByType(uState.items)('planted')).toHaveProperty('builderId', agentId);
+      expect(findItemByType(uState.items)(PLANTED)).toHaveProperty('builderId', agentId);
     });
   });
   describe('RESTART', () => {
@@ -272,7 +273,7 @@ describe('reducer', () => {
     const stateWithBuilding = buildingType => ({
       ...dState,
       items: [
-        {...dAgent, resources: ['crop']},
+        {...dAgent, resources: [CROP]},
         {
           ...dAgent,
           id: 99,
@@ -282,15 +283,15 @@ describe('reducer', () => {
         }]
     });
     it('should unload resource from agent to home', () => {
-      const state = stateWithBuilding('farm');
+      const state = stateWithBuilding(FARM);
       const uState = reducer(state, unloadResource(getAgent));
-      expect(getItemById(99, uState.items)).toHaveProperty('resources', ['crop']);
+      expect(getItemById(99, uState.items)).toHaveProperty('resources', [CROP]);
       expect(getAgent(uState)).toHaveProperty('resources', []);
     });
     it('should unload resource from agent to warehouse', () => {
-      const state = stateWithBuilding('warehouse');
+      const state = stateWithBuilding(WAREHOUSE);
       const uState = reducer(state, unloadResource(getAgent));
-      expect(getItemById(99, uState.items)).toHaveProperty('resources', ['crop']);
+      expect(getItemById(99, uState.items)).toHaveProperty('resources', [CROP]);
       expect(getAgent(uState)).toHaveProperty('resources', []);
     });
   });

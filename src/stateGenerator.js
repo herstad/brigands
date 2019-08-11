@@ -1,3 +1,5 @@
+import {ENEMY, GRASS, HUMAN, ROCK, TREE, WATER} from "./itemTypes";
+
 export const PLAYERS = ['human', 'ai'];
 
 export const generateState = () => {
@@ -26,7 +28,7 @@ export const generateId = () => {
 const generateDefaultItems = (size) => {
   const defaultValues = [];
   for (let i = 0; i < size; i++) {
-    defaultValues.push({id: generateId(), type: 'grass'});
+    defaultValues.push({id: generateId(), type: GRASS});
   }
   return defaultValues;
 };
@@ -36,7 +38,7 @@ const generateItems = (size = 10) => {
     {
       id: generateId(),
       hp: 5,
-      type: 'x',
+      type: ENEMY,
       playerId: 'human',
       ap: 1,
       behaviorName: 'farmer',
@@ -48,7 +50,7 @@ const generateItems = (size = 10) => {
     {
       id: generateId(),
       hp: 5,
-      type: 'o',
+      type: HUMAN,
       playerId: 'ai',
       ap: 1,
       behaviorName: 'brigand',
@@ -60,7 +62,7 @@ const generateItems = (size = 10) => {
     {
       id: generateId(),
       hp: 5,
-      type: 'x',
+      type: ENEMY,
       playerId: 'human',
       ap: 1,
       behaviorName: 'farmer',
@@ -72,7 +74,7 @@ const generateItems = (size = 10) => {
     {
       id: generateId(),
       hp: 5,
-      type: 'x',
+      type: ENEMY,
       playerId: 'human',
       ap: 1,
       behaviorName: 'hauler',
@@ -84,18 +86,18 @@ const generateItems = (size = 10) => {
   ];
 
   const items = [
-    {id: generateId(), type: 'tree'},
-    {id: generateId(), type: 'tree'},
-    {id: generateId(), type: 'tree'},
-    {id: generateId(), type: 'tree'},
-    {id: generateId(), type: 'tree'},
-    {id: generateId(), type: 'tree'},
-    {id: generateId(), type: 'rock'},
-    {id: generateId(), type: 'rock'},
-    {id: generateId(), type: 'rock'},
-    {id: generateId(), type: 'water'},
-    {id: generateId(), type: 'water'},
-    {id: generateId(), type: 'water'},
+    {id: generateId(), type: TREE},
+    {id: generateId(), type: TREE},
+    {id: generateId(), type: TREE},
+    {id: generateId(), type: TREE},
+    {id: generateId(), type: TREE},
+    {id: generateId(), type: TREE},
+    {id: generateId(), type: ROCK},
+    {id: generateId(), type: ROCK},
+    {id: generateId(), type: ROCK},
+    {id: generateId(), type: WATER},
+    {id: generateId(), type: WATER},
+    {id: generateId(), type: WATER},
   ];
 
   const genPos = generatePosition(size);

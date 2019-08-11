@@ -7,24 +7,38 @@ import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
 import {ReducerDispatch} from "./App";
 import {setSelectedItem} from "./reducer";
+import {
+  CROP,
+  DEAD,
+  ENEMY,
+  FARM,
+  GRASS,
+  HUMAN,
+  MOUNTED,
+  PLANTED,
+  ROCK,
+  TREE,
+  WAREHOUSE,
+  WATER
+} from "./itemTypes";
 
 const typeIcons = {
-  o: 'android',
-  x: 'directions_walk',
-  mounted: 'direction_bike',
-  grass: 'crop_free',
-  tree: 'nature',
-  water: 'waves',
-  rock: 'landscape',
-  dead: 'airline_seat_flat',
-  farm: 'home',
-  crop: 'local_florist',
-  planted: 'minimize',
-  warehouse: 'layers',
+  [HUMAN]: 'android',
+  [ENEMY]: 'directions_walk',
+  [MOUNTED]: 'direction_bike',
+  [GRASS]: 'crop_free',
+  [TREE]: 'nature',
+  [WATER]: 'waves',
+  [ROCK]: 'landscape',
+  [DEAD]: 'airline_seat_flat',
+  [FARM]: 'home',
+  [CROP]: 'local_florist',
+  [PLANTED]: 'minimize',
+  [WAREHOUSE]: 'layers',
 
 };
 
-const getIcon = (elem) => elem.hp < 1 ? typeIcons['dead'] : typeIcons[elem.type] || 'crop_free';
+const getIcon = (elem) => elem.hp < 1 ? typeIcons[DEAD] : typeIcons[elem.type] || typeIcons[GRASS];
 
 const createMatrix = (n = 10, items) => {
   let matrix = [];
