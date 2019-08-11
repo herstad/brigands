@@ -28,6 +28,15 @@ const playerItemsWithAp = (playerId) => (items) => {
     .filter(item => item.ap > 0);
 };
 
+function OrderButton({action, orderText}) {
+  const {state, dispatch} = useContext(ReducerDispatch);
+  if (!shouldDisplayOrder(action)(state)) {
+    return null;
+  }
+  const handleAction = () => dispatch(action);
+  return (<Button onClick={handleAction}>{orderText}</Button>);
+}
+
 function TurnButton() {
   const {state, dispatch} = useContext(ReducerDispatch);
   const {items, activePlayerId} = state;
@@ -49,15 +58,11 @@ const shouldDisplayOrder = action => state => {
 };
 
 function AttackButton({targetId}) {
-  const {state, dispatch} = useContext(ReducerDispatch);
+  const {state} = useContext(ReducerDispatch);
   const getAgent = selectItemById(state.selectedId);
   const getTarget = () => selectItemById(targetId);
   const action = attack(getAgent)(getTarget);
-  if (!shouldDisplayOrder(action)(state)) {
-    return null;
-  }
-  const handleAttack = () => dispatch(action);
-  return (<Button onClick={handleAttack}>Attack Enemy</Button>);
+  return (<OrderButton action={action} orderText="Attack Enemy"/>);
 }
 
 const targetClosestType = type => getAgent => state => state.items.filter(item => item.type === type).sort(compareDistance(getAgent(state)))[0];
@@ -84,61 +89,42 @@ function MoveToHomeButton() {
 }
 
 function MoveButton({getTarget, targetName,}) {
-  const {state, dispatch} = useContext(ReducerDispatch);
+  const {state} = useContext(ReducerDispatch);
   const getAgent = selectItemById(state.selectedId);
   const action = moveTowardTarget(getAgent)(getTarget);
-  if (!shouldDisplayOrder(action)(state)) {
-    return null;
-  }
-  const handleMove = () => dispatch(action);
-  return (<Button onClick={handleMove}>Move To {targetName}</Button>);
+  const orderText = `Move To ${targetName}`;
+  return (<OrderButton action={action} orderText={orderText}/>);
 }
 
 function BuildFarmButton() {
-  const {state, dispatch} = useContext(ReducerDispatch);
+  const {state} = useContext(ReducerDispatch);
   const agent = selectSelectedItem(state);
   const getAgent = selectItemById(agent.id);
   const action = buildFarm(getAgent);
-  if (!shouldDisplayOrder(action)(state)) {
-    return null;
-  }
-  const handleBuildFarm = () => dispatch(action);
-  return (<Button onClick={handleBuildFarm}>Build farm</Button>);
+  return (<OrderButton action={action} orderText="Build farm"/>);
 }
 
 function PlantCropButton() {
-  const {state, dispatch} = useContext(ReducerDispatch);
+  const {state} = useContext(ReducerDispatch);
   const agent = selectSelectedItem(state);
   const getAgent = selectItemById(agent.id);
   const action = plantCrop(getAgent);
-  if (!shouldDisplayOrder(action)(state)) {
-    return null;
-  }
-  const handlePlantCrop = () => dispatch(action);
-  return (<Button onClick={handlePlantCrop}>PlantCrop</Button>);
+  return (<OrderButton action={action} orderText="PlantCrop"/>);
 }
 
 function HarvestCropButton() {
-  const {state, dispatch} = useContext(ReducerDispatch);
+  const {state} = useContext(ReducerDispatch);
   const agent = selectSelectedItem(state);
   const getAgent = selectItemById(agent.id);
   const action = harvestCrop(getAgent);
-  if (!shouldDisplayOrder(action)(state)) {
-    return null;
-  }
-  const handleHarvestCrop = () => dispatch(action);
-  return (<Button onClick={handleHarvestCrop}>HarvestCrop</Button>);
+  return (<OrderButton action={action} orderText="HarvestCrop"/>);
 }
 
 function UnloadResourceButton() {
-  const {state, dispatch} = useContext(ReducerDispatch);
+  const {state} = useContext(ReducerDispatch);
   const getAgent = selectItemById(state.selectedId);
   const action = unloadResource(getAgent);
-  if (!shouldDisplayOrder(action)(state)) {
-    return null;
-  }
-  const handleUnload = () => dispatch(action);
-  return (<Button onClick={handleUnload}>Unload Resource</Button>);
+  return (<OrderButton action={action} orderText="Unload Resource"/>);
 }
 
 export default function Orders() {
