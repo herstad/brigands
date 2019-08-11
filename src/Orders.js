@@ -89,6 +89,10 @@ function MoveToHomeButton() {
   return (<MoveButton getTarget={targetHome} targetName={'Home'}/>);
 }
 
+function MoveToWarehouseButton() {
+  return (<MoveButton getTarget={targetClosestType('warehouse')} targetName={'Warehouse'}/>);
+}
+
 function MoveButton({getTarget, targetName,}) {
   const {state} = useContext(ReducerDispatch);
   const getAgent = selectItemById(state.selectedId);
@@ -147,6 +151,7 @@ export default function Orders() {
         <MoveToGrassButton/>
         <MoveToEventButton/>
         <MoveToHomeButton/>
+        <MoveToWarehouseButton/>
         <BuildWarehouseButton/>
         <BuildFarmButton/>
         <PlantCropButton/>
