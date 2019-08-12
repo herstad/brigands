@@ -14,7 +14,7 @@ import {
 import {calculateDistance, move, toward} from "./movement";
 import {pipe} from "./functional";
 import {CROP, FARM, GRASS, PLANTED, WAREHOUSE} from "./itemTypes";
-import {DEFAULT_EVENT} from "./eventTypes";
+import {CROP_GROWN, DEFAULT_EVENT, RESOURCE_PICKUP} from "./eventTypes";
 
 export const ATTACK = 'brigands/reducer/ATTACK';
 export const AUTO_ACTION = 'brigands/reducer/AUTO_ACTION';
@@ -274,6 +274,17 @@ export const sleepOneTurn = getAgent => turn => {
   };
 };
 
+const createEvent = type => itemId => turn => ({
+  id: generateId(),
+  type,
+  itemId,
+  turn
+});
+
+const publishEvents = events => state => {
+  return {...state, events: [...state.events, ...events]}
+};
+
 export default function reducer(state, action) {
   console.log('Action');
   console.log(action);
@@ -284,12 +295,7 @@ export default function reducer(state, action) {
       const grownCrops = apItems.filter(plantedShouldGrow(state.turn));
       const newCrops = updateItems(plantedShouldGrow(state.turn))({type: CROP,})(grownCrops);
       let items = replaceItems(apItems)(newCrops);
-      const cropEvents = newCrops.map((item) => ({
-        id: generateId(),
-        type: 'CROP_GROWN',
-        itemId: item.id,
-        turn: state.turn
-      }));
+      const cropEvents = newCrops.map((item) => (createEvent(CROP_GROWN)(item.id)(state.turn)));
       const events = [...state.events, ...cropEvents].filter(e => e.turn === state.turn);
 
       const updatedEventItems = getItemsByPlayer(selectActivePlayerId(state), items).map(item => (
@@ -362,9 +368,12 @@ export default function reducer(state, action) {
       const agent = payload.getAgent(state);
       const getByType = getItemByXYAndType(state.items)(agent);
       const target = getByType(FARM) || getByType(WAREHOUSE);
-      const updatedTarget = {...target, resources: [...target.resources, agent.resources[0]]};
+      const resource = agent.resources[0];
+      const updatedTarget = {...target, resources: [...target.resources, resource]};
       const updatedAgent = {...agent, resources: agent.resources.slice(1)};
-      return pipe(updateItem(updatedAgent), updateItem(updatedTarget), postAction(action))(state);
+      const event = {...createEvent(RESOURCE_PICKUP)(target.id)(state.turn), resource};
+
+      return pipe(updateItem(updatedAgent), updateItem(updatedTarget), publishEvents([event]), postAction(action))(state);
     }
     case TRAIN_EVENT: {
       const {getAgent, event} = payload;

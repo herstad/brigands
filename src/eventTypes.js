@@ -1,1 +1,3 @@
 export const DEFAULT_EVENT = 'DEFAULT_EVENT';
+export const RESOURCE_PICKUP = 'RESOURCE_PICKUP';
+export const CROP_GROWN = 'CROP_GROWN';

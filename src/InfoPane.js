@@ -20,7 +20,7 @@ function UnitCard() {
   if (selected === undefined) {
     return null;
   }
-  const {id, playerId, x, y, hp, ap, type, resources} = selected;
+  const {id, playerId, x, y, hp, ap, type, behaviorName, resources} = selected;
   const maxHp = 5;
   const relativeHp = hp / maxHp * 100;
   const defaultEvent = {type: DEFAULT_EVENT, itemId: selected.id};
@@ -34,6 +34,7 @@ function UnitCard() {
         <Typography>hp:{hp}</Typography>
         <Typography>ap:{ap}</Typography>
         <Typography>type:{type}</Typography>
+        <Typography>behavior:{behaviorName}</Typography>
         <Typography>resource: {resources} </Typography>
         <LinearProgress variant="determinate" value={relativeHp}/>
         <TrainEventButton event={defaultEvent}/>
@@ -82,7 +83,6 @@ function FinishTrainEventButton() {
 
 function EventCard({event}) {
   const {state} = useContext(ReducerDispatch);
-  // TODO check item connected to event  still exists
   const {x, y, type} = (event.itemId ? selectItemById(event.itemId)(state) || {} : {});
   return (
     <Card>

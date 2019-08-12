@@ -295,6 +295,18 @@ describe('reducer', () => {
       expect(getItemById(99, uState.items)).toHaveProperty('resources', [CROP]);
       expect(getAgent(uState)).toHaveProperty('resources', []);
     });
+    it('should publish event', () => {
+      const state = stateWithBuilding(FARM);
+      const uState = reducer(state, unloadResource(getAgent));
+      //TODO rewrite with equals
+      expect(uState).toHaveProperty('events', [{
+        "id": 1,
+        "itemId": 99,
+        "resource": "crop",
+        "turn": 0,
+        "type": "RESOURCE_PICKUP"
+      }])
+    });
   });
   describe('SLEEP', () => {
     it('should sleep one turn', () => {
