@@ -12,6 +12,7 @@ import {
   setActiveEvent,
   trainEventBehavior
 } from "./reducer";
+import {DEFAULT_EVENT} from "./eventTypes";
 
 function UnitCard() {
   const {state} = useContext(ReducerDispatch);
@@ -22,7 +23,7 @@ function UnitCard() {
   const {id, playerId, x, y, hp, ap, type, resources} = selected;
   const maxHp = 5;
   const relativeHp = hp / maxHp * 100;
-  const defaultEvent = {type: 'DEFAULT_EVENT', itemId: selected.id};
+  const defaultEvent = {type: DEFAULT_EVENT, itemId: selected.id};
   return (
     <Card>
       <CardContent>

@@ -20,6 +20,7 @@ import reducer, {
 import {findItemByType, getItemById} from "./itemsUtil";
 import {PLAYERS} from "./stateGenerator";
 import {CROP, ENEMY, FARM, GRASS, HUMAN, PLANTED, WAREHOUSE} from "./itemTypes";
+import {DEFAULT_EVENT} from "./eventTypes";
 
 describe('reducer', () => {
   const dAgent = {
@@ -248,10 +249,10 @@ describe('reducer', () => {
       expect(getAgent(uState)).toHaveProperty('activeEvent.type', 'TEST_EVENT');
     });
     it('should set default event if no events', () => {
-      const behaviors = fakeBehavior('DEFAULT_EVENT');
+      const behaviors = fakeBehavior(DEFAULT_EVENT);
       const state = {...dState, behaviors};
       const uState = reducer(state, setUnitBehaviorAction(getAgent));
-      expect(getAgent(uState)).toHaveProperty('activeEvent.type', 'DEFAULT_EVENT');
+      expect(getAgent(uState)).toHaveProperty('activeEvent.type', DEFAULT_EVENT);
     });
     it('should set SLEEPING event if default behavior', () => {
       const uState = reducer(dState, setUnitBehaviorAction(getAgent));

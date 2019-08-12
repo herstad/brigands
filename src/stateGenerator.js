@@ -1,4 +1,5 @@
 import {ENEMY, GRASS, HUMAN, ROCK, TREE, WATER} from "./itemTypes";
+import {DEFAULT_EVENT} from "./eventTypes";
 
 export const PLAYERS = ['human', 'ai'];
 
@@ -44,7 +45,7 @@ const generateItems = (size = 10) => {
       behaviorName: 'farmer',
       conditionalActions: [],
       events: [],
-      activeEvent: {type: 'DEFAULT_EVENT'},
+      activeEvent: {type: DEFAULT_EVENT},
       resources: [],
     },
     {
@@ -56,7 +57,7 @@ const generateItems = (size = 10) => {
       behaviorName: 'brigand',
       conditionalActions: [],
       events: [],
-      activeEvent: {type: 'DEFAULT_EVENT'},
+      activeEvent: {type: DEFAULT_EVENT},
       resources: [],
     },
     {
@@ -68,7 +69,7 @@ const generateItems = (size = 10) => {
       behaviorName: 'farmer',
       conditionalActions: [],
       events: [],
-      activeEvent: {type: 'DEFAULT_EVENT'},
+      activeEvent: {type: DEFAULT_EVENT},
       resources: [],
     },
     {
@@ -80,7 +81,7 @@ const generateItems = (size = 10) => {
       behaviorName: 'hauler',
       conditionalActions: [],
       events: [],
-      activeEvent: {type: 'DEFAULT_EVENT'},
+      activeEvent: {type: DEFAULT_EVENT},
       resources: [],
     },
   ];

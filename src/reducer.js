@@ -14,6 +14,7 @@ import {
 import {calculateDistance, move, toward} from "./movement";
 import {pipe} from "./functional";
 import {CROP, FARM, GRASS, PLANTED, WAREHOUSE} from "./itemTypes";
+import {DEFAULT_EVENT} from "./eventTypes";
 
 export const ATTACK = 'brigands/reducer/ATTACK';
 export const AUTO_ACTION = 'brigands/reducer/AUTO_ACTION';
@@ -407,7 +408,7 @@ export default function reducer(state, action) {
       //TODO call SET_ACTIVE_EVENT or refactor
       const {getAgent} = payload;
       const agent = getAgent(state);
-      const activeEvent = agent.events.length > 0 ? agent.events[0] : {type: 'DEFAULT_EVENT'};
+      const activeEvent = agent.events.length > 0 ? agent.events[0] : {type: DEFAULT_EVENT};
       const conditionalActions = selectEventBehavior(agent.behaviorName)(activeEvent.type)(state);
       const unitActions = conditionalActions.map(conditionalAction => {
           return {
@@ -419,7 +420,7 @@ export default function reducer(state, action) {
 
       //TODO quickfix to stop endless recursion if there is no valid action for DEFAULT_EVENT
       console.log(unitActions);
-      if (activeEvent.type === 'DEFAULT_EVENT' && !getNextAction(getAgent)(state)(unitActions)) {
+      if (activeEvent.type === DEFAULT_EVENT && !getNextAction(getAgent)(state)(unitActions)) {
         return reducer(state, sleepOneTurn(getAgent)(state.turn));
       }
       console.log('Updated actions for event: ' + activeEvent.type);
