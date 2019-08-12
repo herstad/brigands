@@ -20,7 +20,7 @@ import reducer, {
 import {findItemByType, getItemById} from "./itemsUtil";
 import {PLAYERS} from "./stateGenerator";
 import {CROP, ENEMY, FARM, GRASS, HUMAN, PLANTED, WAREHOUSE} from "./itemTypes";
-import {DEFAULT_EVENT} from "./eventTypes";
+import {DEFAULT_EVENT} from "./events/eventTypes";
 
 describe('reducer', () => {
   const dAgent = {
@@ -298,14 +298,7 @@ describe('reducer', () => {
     it('should publish event', () => {
       const state = stateWithBuilding(FARM);
       const uState = reducer(state, unloadResource(getAgent));
-      //TODO rewrite with equals
-      expect(uState).toHaveProperty('events', [{
-        "id": 1,
-        "itemId": 99,
-        "resource": "crop",
-        "turn": 0,
-        "type": "RESOURCE_PICKUP"
-      }])
+      expect(uState).toHaveProperty('events.length', 1)
     });
   });
   describe('SLEEP', () => {

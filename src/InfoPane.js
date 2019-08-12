@@ -12,7 +12,8 @@ import {
   setActiveEvent,
   trainEventBehavior
 } from "./reducer";
-import {DEFAULT_EVENT} from "./eventTypes";
+import {DEFAULT_EVENT} from "./events/eventTypes";
+import {isEventVisible} from "./events/eventUtils";
 
 function UnitCard() {
   const {state} = useContext(ReducerDispatch);
@@ -102,7 +103,8 @@ function EventsInfo() {
   const {state} = useContext(ReducerDispatch);
   const {events} = state;
   const selectedUnit = selectSelectedItem(state);
-  const newEvents = selectedUnit.activeEvent ? [selectedUnit.activeEvent, ...events] : events;
+  const visibleEvents = events.filter(isEventVisible(selectedUnit.id));
+  const newEvents = selectedUnit.activeEvent ? [selectedUnit.activeEvent, ...visibleEvents] : visibleEvents;
   return newEvents.map((event, index) => <EventCard key={"event" + index} event={event}/>);
 }
 

@@ -1,5 +1,5 @@
 import {ENEMY, GRASS, HUMAN, ROCK, TREE, WATER} from "./itemTypes";
-import {DEFAULT_EVENT} from "./eventTypes";
+import {DEFAULT_EVENT} from "./events/eventTypes";
 
 export const PLAYERS = ['human', 'ai'];
 

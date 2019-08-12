@@ -14,7 +14,8 @@ import {
 import {calculateDistance, move, toward} from "./movement";
 import {pipe} from "./functional";
 import {CROP, FARM, GRASS, PLANTED, WAREHOUSE} from "./itemTypes";
-import {CROP_GROWN, DEFAULT_EVENT, RESOURCE_PICKUP} from "./eventTypes";
+import {CROP_GROWN, DEFAULT_EVENT, RESOURCE_PICKUP} from "./events/eventTypes";
+import {hasBehaviorForEvent, isEventVisible} from "./events/eventUtils";
 
 export const ATTACK = 'brigands/reducer/ATTACK';
 export const AUTO_ACTION = 'brigands/reducer/AUTO_ACTION';
@@ -37,7 +38,7 @@ export const selectItemById = id => state => getItemById(id, state.items);
 
 export const selectSelectedItem = state => getItemById(state.selectedId, state.items);
 
-const selectEventBehavior = behaviorName => eventType => state => {
+export const selectEventBehavior = behaviorName => eventType => state => {
   const behavior = state.behaviors[behaviorName] || {};
   const eventBehavior = behavior[eventType] || {};
   return eventBehavior.conditionalActions || [];
@@ -109,10 +110,6 @@ const createBuildingOn = getAgent => buildingType => targetId => state => {
 
 const plantedShouldGrow = turn => item => item.type === PLANTED && item.createdTurn + 5 <= turn;
 
-const hasBehaviorForEvent = item => event => state => {
-  const behavior = selectEventBehavior(item.behaviorName)(event.type)(state);
-  return !!behavior.length;
-};
 
 const getNextAction = getAgent => state => conditionalActions => conditionalActions.find(conditionalAction => conditionalAction.payload.condition(getAgent)(state));
 
@@ -278,7 +275,14 @@ const createEvent = type => itemId => turn => ({
   id: generateId(),
   type,
   itemId,
-  turn
+  turn,
+  local: false,
+});
+
+const createLocalEvent = type => itemId => turn => agentId => ({
+  ...createEvent(type)(itemId)(turn),
+  agentId,
+  local: true,
 });
 
 const publishEvents = events => state => {
@@ -295,13 +299,13 @@ export default function reducer(state, action) {
       const grownCrops = apItems.filter(plantedShouldGrow(state.turn));
       const newCrops = updateItems(plantedShouldGrow(state.turn))({type: CROP,})(grownCrops);
       let items = replaceItems(apItems)(newCrops);
-      const cropEvents = newCrops.map((item) => (createEvent(CROP_GROWN)(item.id)(state.turn)));
+      const cropEvents = newCrops.map((item) => (createLocalEvent(CROP_GROWN)(item.id)(state.turn)(item.builderId)));
       const events = [...state.events, ...cropEvents].filter(e => e.turn === state.turn);
 
       const updatedEventItems = getItemsByPlayer(selectActivePlayerId(state), items).map(item => (
         {
           ...item,
-          events: [...item.events, ...events.filter(event => hasBehaviorForEvent(item)(event)(state) || item.training)]
+          events: [...item.events, ...events.filter(event => isEventVisible(item.id)(event) && (hasBehaviorForEvent(item)(event)(state) || item.training))]
         }));
       items = replaceItems(items)(updatedEventItems);
 
