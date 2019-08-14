@@ -15,6 +15,7 @@ import {
   GRASS,
   HUMAN,
   MOUNTED,
+  PATH,
   PLANTED,
   ROCK,
   TREE,
@@ -35,6 +36,7 @@ const typeIcons = {
   [CROP]: 'local_florist',
   [PLANTED]: 'minimize',
   [WAREHOUSE]: 'layers',
+  [PATH]: 'grain',
 
 };
 

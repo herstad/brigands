@@ -10,3 +10,4 @@ export const FARM = 'farm';
 export const CROP = 'crop';
 export const PLANTED = 'planted';
 export const WAREHOUSE = 'warehouse';
+export const PATH = 'path';

@@ -13,7 +13,7 @@ import {
 } from "./itemsUtil";
 import {calculateDistance, move, toward} from "./movement";
 import {pipe} from "./functional";
-import {CROP, FARM, GRASS, PLANTED, WAREHOUSE} from "./itemTypes";
+import {CROP, FARM, GRASS, PATH, PLANTED, WAREHOUSE} from "./itemTypes";
 import {CROP_GROWN, DEFAULT_EVENT, RESOURCE_PICKUP} from "./events/eventTypes";
 import {hasBehaviorForEvent, isEventVisible} from "./events/eventUtils";
 
@@ -25,6 +25,7 @@ export const END_TURN = 'brigands/reducer/END_TURN';
 export const FINISH_TRAIN_EVENT = 'brigands/reducer/FINISH_TRAIN_EVENT';
 export const HARVEST_CROP = 'brigands/reducer/HARVEST_CROP';
 export const MOVE = 'brigands/reducer/MOVE';
+export const MAKE_PATH = 'brigands/reducer/MAKE_PATH';
 export const PLANT_CROP = 'brigands/reducer/PLANT_CROP';
 export const RESTART = 'brigands/reducer/RESTART';
 export const SET_ACTIVE_EVENT = 'brigands/reducer/SET_ACTIVE_EVENT';
@@ -62,6 +63,8 @@ const getWinner = (state) => {
 const isLoser = (playerId, items) => {
   return getItemsByPlayer(playerId, items).every((item) => item.hp <= 0);
 };
+
+const delegateToReducer = action => state => reducer(state, action);
 
 const consumeAp = (action, state) => {
   const {condition} = action.payload;
@@ -215,6 +218,19 @@ export const moveTowardTarget = getAgent => getTarget => {
   }
 };
 
+const makePathTarget = getAgent => state => getItemByXYAndType(state.items)(getAgent(state))(GRASS);
+
+const makePathCondition = getTarget => getAgent => state => !!getTarget(getAgent)(state);
+
+export const makePath = getAgent => ({
+  type: MAKE_PATH,
+  payload: {
+    getAgent,
+    getTarget: makePathTarget,
+    condition: makePathCondition(makePathTarget),
+  }
+});
+
 const unloadResourceCondition = getAgent => state => {
   const agent = getAgent(state);
   const getByType = getItemByXYAndType(state.items)(agent);
@@ -321,7 +337,6 @@ export default function reducer(state, action) {
     case AUTO_ACTION: {
       const {getAgent} = payload;
       const agent = getAgent(state);
-      console.log(agent);
       const nextAction = getNextAction(getAgent)(state)(agent.conditionalActions);
       //TODO unclear order of execution. use pipe
       return nextAction ? reducer(state, nextAction) : reducer(reducer(state, setUnitBehaviorAction(getAgent)), action);
@@ -348,7 +363,19 @@ export default function reducer(state, action) {
     case MOVE: {
       const {getAgent, getTarget} = payload;
       const moveAgent = (s) => updateItem(move(getAgent(s), toward(getTarget(getAgent)(s))))(s);
-      return pipe(moveAgent, postAction(action))(state);
+      return pipe(moveAgent, delegateToReducer(makePath(getAgent)), postAction(action))(state);
+    }
+    case MAKE_PATH: {
+      const {getAgent, getTarget, condition} = payload;
+      if (condition(getAgent)(state)) {
+        const target = getTarget(getAgent)(state);
+        //TODO ensure that visited always exists instead of null check
+        const updatedVisited = target.visited ? [...target.visited, state.turn] : [state.turn];
+        const visited = updatedVisited.filter(turn => turn + 100 > state.turn);
+        const type = visited.length > 5 ? PATH : target.type;
+        return updateItem({...target, visited, type})(state);
+      }
+      return state;
     }
     case BUILD_FARM: {
       return createBuilding(payload.getAgent, FARM, consumeAp(action, state));
@@ -381,9 +408,15 @@ export default function reducer(state, action) {
     }
     case TRAIN_EVENT: {
       const {getAgent, event} = payload;
+      const agent = getAgent(state);
       return updateItemById({
-        id: getAgent(state).id,
-        behaviorTraining: {name: 'farmer', eventType: event.type, event, conditionalActions: []},
+        ...agent,
+        behaviorTraining: {
+          name: agent.behaviorName,
+          eventType: event.type,
+          event,
+          conditionalActions: []
+        },
         training: true,
       }, state);
     }
