@@ -6,6 +6,7 @@ import reducer, {
   endTurn,
   finishTrainEventBehavior,
   harvestCrop,
+  makePath,
   moveTowardTarget,
   plantCrop,
   restart,
@@ -19,7 +20,7 @@ import reducer, {
 } from "./reducer";
 import {findItemByType, getItemById} from "./itemsUtil";
 import {PLAYERS} from "./stateGenerator";
-import {CROP, FARM, GRASS, HUMAN, PLANTED, PLAYER2, WAREHOUSE} from "./itemTypes";
+import {CROP, FARM, GRASS, HUMAN, PATH, PLANTED, PLAYER2, TREE, WAREHOUSE} from "./itemTypes";
 import {DEFAULT_EVENT} from "./events/eventTypes";
 
 describe('reducer', () => {
@@ -208,6 +209,26 @@ describe('reducer', () => {
     it('should move right', () => {
       const uState = reducer(dState, moveTowardTarget(getAgent)(getTarget));
       expect(getAgent(uState)).toHaveProperty('y', 1)
+    });
+  });
+  describe('MAKE_PATH', () => {
+    it('should add to visited on GRASS', () => {
+      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: GRASS}]};
+      const uState = reducer(state, makePath(getAgent));
+      expect(uState.items.find(item => GRASS === item.type)).toHaveProperty('visited', [0]);
+    });
+    it('should make path on frequently visited GRASS', () => {
+      const state = {
+        ...dState,
+        items: [...dState.items, {...dAgent, id: 99, type: GRASS, visited: [0, 1, 2, 3, 4, 5]}]
+      };
+      const uState = reducer(state, makePath(getAgent));
+      expect(uState.items.find(item => PATH === item.type)).toHaveProperty('visited', [0, 1, 2, 3, 4, 5, 0]);
+    });
+    it('should not add to visited on TREE', () => {
+      const state = {...dState, items: [...dState.items, {...dAgent, id: 99, type: TREE}]};
+      const uState = reducer(state, makePath(getAgent));
+      expect(uState.items.find(item => TREE === item.type)).toHaveProperty('visited', undefined);
     });
   });
   describe('PLANT_CROP', () => {
