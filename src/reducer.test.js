@@ -19,13 +19,13 @@ import reducer, {
 } from "./reducer";
 import {findItemByType, getItemById} from "./itemsUtil";
 import {PLAYERS} from "./stateGenerator";
-import {CROP, ENEMY, FARM, GRASS, HUMAN, PLANTED, WAREHOUSE} from "./itemTypes";
+import {CROP, FARM, GRASS, HUMAN, PLANTED, PLAYER2, WAREHOUSE} from "./itemTypes";
 import {DEFAULT_EVENT} from "./events/eventTypes";
 
 describe('reducer', () => {
   const dAgent = {
     id: 0,
-    type: ENEMY,
+    type: HUMAN,
     playerId: 'human',
     ap: 1,
     x: 0,
@@ -38,7 +38,7 @@ describe('reducer', () => {
   };
   const dTarget = {
     id: 1,
-    type: HUMAN,
+    type: PLAYER2,
     playerId: 'ai',
     ap: 1,
     x: 0,

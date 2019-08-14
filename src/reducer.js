@@ -338,8 +338,7 @@ export default function reducer(state, action) {
       const {getAgent} = payload;
       const agent = getAgent(state);
       const nextAction = getNextAction(getAgent)(state)(agent.conditionalActions);
-      //TODO unclear order of execution. use pipe
-      return nextAction ? reducer(state, nextAction) : reducer(reducer(state, setUnitBehaviorAction(getAgent)), action);
+      return nextAction ? delegateToReducer(nextAction)(state) : pipe(delegateToReducer(setUnitBehaviorAction(getAgent)), delegateToReducer(action))(state);
     }
     case RESTART: {
       const behaviors = state.behaviors;

@@ -1,5 +1,5 @@
-export const HUMAN = 'o';
-export const ENEMY = 'x';
+export const PLAYER2 = 'o';
+export const HUMAN = 'x';
 export const MOUNTED = 'mounted';
 export const GRASS = 'grass';
 export const TREE = 'tree';

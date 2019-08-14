@@ -10,13 +10,13 @@ import {setSelectedItem} from "./reducer";
 import {
   CROP,
   DEAD,
-  ENEMY,
   FARM,
   GRASS,
   HUMAN,
   MOUNTED,
   PATH,
   PLANTED,
+  PLAYER2,
   ROCK,
   TREE,
   WAREHOUSE,
@@ -24,8 +24,8 @@ import {
 } from "./itemTypes";
 
 const typeIcons = {
-  [HUMAN]: 'android',
-  [ENEMY]: 'directions_walk',
+  [PLAYER2]: 'android',
+  [HUMAN]: 'directions_walk',
   [MOUNTED]: 'direction_bike',
   [GRASS]: 'crop_free',
   [TREE]: 'nature',
