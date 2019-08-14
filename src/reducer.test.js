@@ -6,6 +6,7 @@ import reducer, {
   endTurn,
   finishTrainEventBehavior,
   harvestCrop,
+  loadResource,
   makePath,
   moveTowardTarget,
   plantCrop,
@@ -320,6 +321,32 @@ describe('reducer', () => {
       const state = stateWithBuilding(FARM);
       const uState = reducer(state, unloadResource(getAgent));
       expect(uState).toHaveProperty('events.length', 1)
+    });
+  });
+  describe('LOAD_RESOURCE', () => {
+    const stateWithBuilding = buildingType => ({
+      ...dState,
+      items: [
+        ...dState.items,
+        {
+          ...dAgent,
+          id: 99,
+          builderId: dAgent.id,
+          type: buildingType,
+          resources: [CROP]
+        }]
+    });
+    it('should load resource from home to agent', () => {
+      const state = stateWithBuilding(FARM);
+      const uState = reducer(state, loadResource(getAgent));
+      expect(getItemById(99, uState.items)).toHaveProperty('resources', []);
+      expect(getAgent(uState)).toHaveProperty('resources', [CROP]);
+    });
+    it('should load resource from warehouse to agent', () => {
+      const state = stateWithBuilding(WAREHOUSE);
+      const uState = reducer(state, loadResource(getAgent));
+      expect(getItemById(99, uState.items)).toHaveProperty('resources', []);
+      expect(getAgent(uState)).toHaveProperty('resources', [CROP]);
     });
   });
   describe('SLEEP', () => {

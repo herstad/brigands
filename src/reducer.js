@@ -33,6 +33,7 @@ export const SET_SELECTED = 'brigands/reducer/SET_SELECTED';
 export const SET_UNIT_BEHAVIOR = 'brigands/reducer/SET_UNIT_BEHAVIOR';
 export const TRAIN_EVENT = 'brigands/reducer/TRAIN_EVENT';
 export const UNLOAD_RESOURCE = 'brigands/reducer/UNLOAD_RESOURCE';
+export const LOAD_RESOURCE = 'brigands/reducer/LOAD_RESOURCE';
 export const SLEEP = 'brigands/reducer/SLEEP';
 
 export const selectItemById = id => state => getItemById(id, state.items);
@@ -247,6 +248,23 @@ export const unloadResource = getAgent => {
   }
 };
 
+const loadResourceCondition = getAgent => state => {
+  const agent = getAgent(state);
+  const getByType = getItemByXYAndType(state.items)(agent);
+  const target = getByType(FARM) || getByType(WAREHOUSE) || {};
+  return !!target.resources && target.resources.length > 0;
+};
+
+export const loadResource = getAgent => {
+  return {
+    type: LOAD_RESOURCE,
+    payload: {
+      getAgent,
+      condition: loadResourceCondition,
+    }
+  }
+};
+
 export const setActiveEvent = getAgent => event => ({
   type: SET_ACTIVE_EVENT,
   payload: {
@@ -393,6 +411,16 @@ export default function reducer(state, action) {
         resources: [...agent.resources, CROP]
       }, state);
       return createBuildingOn(payload.getAgent)(GRASS)(target.id)(consumeAp(action, addedResourceState));
+    }
+    case LOAD_RESOURCE: {
+      const agent = payload.getAgent(state);
+      const getByType = getItemByXYAndType(state.items)(agent);
+      const target = getByType(FARM) || getByType(WAREHOUSE);
+      const resource = target.resources[0];
+      const updatedAgent = {...agent, resources: [...agent.resources, resource]};
+      const updatedTarget = {...target, resources: target.resources.slice(1)};
+
+      return pipe(updateItem(updatedAgent), updateItem(updatedTarget), postAction(action))(state);
     }
     case UNLOAD_RESOURCE: {
       const agent = payload.getAgent(state);

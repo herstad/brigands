@@ -11,6 +11,7 @@ import {
   buildWarehouse,
   endTurn,
   harvestCrop,
+  loadResource,
   moveTowardTarget,
   plantCrop,
   selectItemById,
@@ -140,6 +141,13 @@ function UnloadResourceButton() {
   return (<OrderButton action={action}>Unload Resource</OrderButton>);
 }
 
+function LoadResourceButton() {
+  const {state} = useContext(ReducerDispatch);
+  const getAgent = selectItemById(state.selectedId);
+  const action = loadResource(getAgent);
+  return (<OrderButton action={action}>Load Resource</OrderButton>);
+}
+
 export default function Orders() {
   const {state} = useContext(ReducerDispatch);
   return <div>
@@ -158,6 +166,7 @@ export default function Orders() {
         <PlantCropButton/>
         <HarvestCropButton/>
         <UnloadResourceButton/>
+        <LoadResourceButton/>
       </CardContent>
     </Card>
   </div>
