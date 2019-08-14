@@ -322,6 +322,8 @@ const createLocalEvent = type => itemId => turn => agentId => ({
 const publishEvents = events => state => {
   return {...state, events: [...state.events, ...events]}
 };
+//TODO hack, WAREHOUSE is only building that any unit can build
+const isHome = target => agent => target.builderId === agent.id && target.type !== WAREHOUSE;
 
 export default function reducer(state, action) {
   console.log('Action');
@@ -429,9 +431,11 @@ export default function reducer(state, action) {
       const resource = agent.resources[0];
       const updatedTarget = {...target, resources: [...target.resources, resource]};
       const updatedAgent = {...agent, resources: agent.resources.slice(1)};
-      const event = {...createEvent(RESOURCE_PICKUP)(target.id)(state.turn), resource};
-
-      return pipe(updateItem(updatedAgent), updateItem(updatedTarget), publishEvents([event]), postAction(action))(state);
+      if (isHome(target)(agent)) {
+        const event = {...createEvent(RESOURCE_PICKUP)(target.id)(state.turn), resource};
+        return pipe(updateItem(updatedAgent), updateItem(updatedTarget), publishEvents([event]), postAction(action))(state);
+      }
+      return pipe(updateItem(updatedAgent), updateItem(updatedTarget), postAction(action))(state);
     }
     case TRAIN_EVENT: {
       const {getAgent, event} = payload;

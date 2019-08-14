@@ -317,10 +317,15 @@ describe('reducer', () => {
       expect(getItemById(99, uState.items)).toHaveProperty('resources', [CROP]);
       expect(getAgent(uState)).toHaveProperty('resources', []);
     });
-    it('should publish event', () => {
+    it('should publish event unloading to home', () => {
       const state = stateWithBuilding(FARM);
       const uState = reducer(state, unloadResource(getAgent));
       expect(uState).toHaveProperty('events.length', 1)
+    });
+    it('should not publish event unloading to not home', () => {
+      const state = stateWithBuilding(WAREHOUSE);
+      const uState = reducer(state, unloadResource(getAgent));
+      expect(uState).toHaveProperty('events.length', 0)
     });
   });
   describe('LOAD_RESOURCE', () => {
