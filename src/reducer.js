@@ -389,9 +389,8 @@ export default function reducer(state, action) {
       if (condition(getAgent)(state)) {
         const target = getTarget(getAgent)(state);
         //TODO ensure that visited always exists instead of null check
-        const updatedVisited = target.visited ? [...target.visited, state.turn] : [state.turn];
-        const visited = updatedVisited.filter(turn => turn + 100 > state.turn);
-        const type = visited.length > 5 ? PATH : target.type;
+        const visited = target.visited ? [...target.visited, state.turn] : [state.turn];
+        const type = visited.length > 3 ? PATH : target.type;
         return updateItem({...target, visited, type})(state);
       }
       return state;
