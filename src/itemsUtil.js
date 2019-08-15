@@ -30,8 +30,9 @@ export const replaceItems = items => replacements => {
   return items.map(obj => replacements.find(o => o.id === obj.id) || obj);
 };
 
-export const updateItems = predicate => updatedItem => items => {
-  return items.map(updateItemFn(predicate)(updatedItem));
+export const updateItems = predicate => updatedItem => state => {
+  const items = state.items.map(updateItemFn(predicate)(updatedItem));
+  return {...state, items};
 };
 
 export const updateItemFn = predicate => updatedItem => {

@@ -4,9 +4,7 @@ import {
   getItemByXYAndType,
   getItemsByPlayer,
   inRange,
-  isPlayer,
   removeItemById,
-  replaceItems,
   updateItem,
   updateItemById,
   updateItems
@@ -325,34 +323,52 @@ const publishEvents = events => state => {
 //TODO hack, WAREHOUSE is only building that any unit can build
 const isHome = target => agent => target.builderId === agent.id && target.type !== WAREHOUSE;
 
+const updateItemsByActivePlayer = fn => state => {
+  const updates = getItemsByPlayer(selectActivePlayerId(state), state.items).map(item => updateItem(fn(item)));
+  return pipe(...updates)(state);
+};
+
+const replenishAp = state => {
+  const updateFn = item => ({...item, ap: item.ap < 1 ? item.ap + 1 : item.ap});
+  return updateItemsByActivePlayer(updateFn)(state);
+};
+
+const cropsGrownEvents = state => {
+  const grownCrops = state.items.filter(plantedShouldGrow(state.turn));
+  const cropEvents = grownCrops.map((item) => (createLocalEvent(CROP_GROWN)(item.id)(state.turn)(item.builderId)));
+  return {...state, events: [...state.events, ...cropEvents]}
+};
+
+const growCrops = state => updateItems(plantedShouldGrow(state.turn))({type: CROP,})(state);
+
+const filterOldEvents = state => ({
+  ...state,
+  events: state.events.filter(e => e.turn === state.turn)
+});
+
+const addEventsToUnits = state => {
+  const updateFn = item => (
+    {
+      ...item,
+      events: [...item.events, ...state.events.filter(event => isEventVisible(item.id)(event) && (hasBehaviorForEvent(item)(event)(state) || item.training))]
+    });
+  return updateItemsByActivePlayer(updateFn)(state);
+};
+
+const setNextTurn = state => ({...state, turn: nextTurn(state.turn, selectActivePlayerId(state))});
+
+const setNextPlayer = state => ({
+  ...state,
+  activePlayerId: nextPlayer(selectActivePlayerId(state))
+});
+
 export default function reducer(state, action) {
   console.log('Action');
   console.log(action);
   const {payload} = action;
   switch (action.type) {
     case END_TURN: {
-      const apItems = updateItems((item) => isPlayer(selectActivePlayerId(state), item))({ap: 1})(state.items);
-      const grownCrops = apItems.filter(plantedShouldGrow(state.turn));
-      const newCrops = updateItems(plantedShouldGrow(state.turn))({type: CROP,})(grownCrops);
-      let items = replaceItems(apItems)(newCrops);
-      const cropEvents = newCrops.map((item) => (createLocalEvent(CROP_GROWN)(item.id)(state.turn)(item.builderId)));
-      const events = [...state.events, ...cropEvents].filter(e => e.turn === state.turn);
-
-      const updatedEventItems = getItemsByPlayer(selectActivePlayerId(state), items).map(item => (
-        {
-          ...item,
-          events: [...item.events, ...events.filter(event => isEventVisible(item.id)(event) && (hasBehaviorForEvent(item)(event)(state) || item.training))]
-        }));
-      items = replaceItems(items)(updatedEventItems);
-
-      return {
-        ...state,
-        items,
-        turn: nextTurn(state.turn, selectActivePlayerId(state)),
-        activePlayerId: nextPlayer(selectActivePlayerId(state)),
-        winner: getWinner(state),
-        events,
-      };
+      return pipe(replenishAp, cropsGrownEvents, growCrops, filterOldEvents, addEventsToUnits, setNextTurn, setNextPlayer)(state);
     }
     case AUTO_ACTION: {
       const {getAgent} = payload;
