@@ -22,14 +22,14 @@ import reducer, {
 import {findItemByType, getItemById} from "./itemsUtil";
 import {PLAYERS} from "./stateGenerator";
 import {CROP, FARM, GRASS, HUMAN, PATH, PLANTED, PLAYER2, TREE, WAREHOUSE} from "./itemTypes";
-import {DEFAULT_EVENT} from "./events/eventTypes";
+import {DEFAULT_EVENT, SLEEPING} from "./events/eventTypes";
 
 describe('reducer', () => {
   const dAgent = {
     id: 0,
     type: HUMAN,
     playerId: 'human',
-    ap: 1,
+    ap: 10,
     x: 0,
     y: 0,
     hp: 5,
@@ -39,7 +39,7 @@ describe('reducer', () => {
     events: [],
   };
   const dTarget = {
-    id: 1,
+    id: 10,
     type: PLAYER2,
     playerId: 'ai',
     ap: 1,
@@ -99,7 +99,7 @@ describe('reducer', () => {
       const uState = reducer(state, attack(getAgent)(getTarget));
       const uAgent = getAgent(uState);
       const uTarget = getTarget()(uState);
-      expect(uAgent.ap).toBe(1);
+      expect(uAgent.ap).toBe(10);
       expect(uTarget.hp).toBe(5);
     });
   });
@@ -118,7 +118,7 @@ describe('reducer', () => {
         ]
       };
       const uState = reducer({...dState, items: [agent]}, autoAction(getAgent));
-      expect(getAgent(uState)).toHaveProperty('activeEvent.type', 'SLEEPING');
+      expect(getAgent(uState)).toHaveProperty('activeEvent.type', SLEEPING);
     });
     it('should skip invalid actions', () => {
       const agent = {
@@ -126,11 +126,11 @@ describe('reducer', () => {
         conditionalActions: [invalidConditionalActionSleep(), validConditionalActionSleep()]
       };
       const uState = reducer({...dState, items: [agent]}, autoAction(getAgent));
-      expect(getAgent(uState)).toHaveProperty('activeEvent.type', 'SLEEPING');
+      expect(getAgent(uState)).toHaveProperty('activeEvent.type', SLEEPING);
     });
     it('should perform action from next event if no valid actions', () => {
       const uState = reducer(dState, setUnitBehaviorAction(getAgent));
-      expect(getAgent(uState)).toHaveProperty('activeEvent.type', 'SLEEPING');
+      expect(getAgent(uState)).toHaveProperty('activeEvent.type', SLEEPING);
     });
   });
   describe('BUILD_FARM', () => {
@@ -178,7 +178,7 @@ describe('reducer', () => {
       const agent = {...dAgent, ap: 0};
       const state = {...dState, items: [agent]};
       const uState = reducer(state, endTurn());
-      expect(getAgent(uState)).toHaveProperty('ap', 1);
+      expect(getAgent(uState)).toHaveProperty('ap', 10);
     });
   });
   describe('FINISH_TRAIN_EVENT', () => {
@@ -278,7 +278,7 @@ describe('reducer', () => {
     });
     it('should set SLEEPING event if default behavior', () => {
       const uState = reducer(dState, setUnitBehaviorAction(getAgent));
-      expect(getAgent(uState)).toHaveProperty('activeEvent.type', 'SLEEPING');
+      expect(getAgent(uState)).toHaveProperty('activeEvent.type', SLEEPING);
     });
   });
   describe('TRAIN_EVENT', () => {
@@ -357,7 +357,7 @@ describe('reducer', () => {
   describe('SLEEP', () => {
     it('should sleep one turn', () => {
       const uState = reducer(dState, sleepOneTurn(getAgent)(0));
-      expect(getAgent(uState)).toHaveProperty('activeEvent.type', 'SLEEPING');
+      expect(getAgent(uState)).toHaveProperty('activeEvent.type', SLEEPING);
     })
   })
 

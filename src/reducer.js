@@ -3,6 +3,7 @@ import {
   getItemById,
   getItemByXYAndType,
   getItemsByPlayer,
+  getItemsByXY,
   inRange,
   removeItemById,
   updateItem,
@@ -11,8 +12,8 @@ import {
 } from "./itemsUtil";
 import {calculateDistance, move, toward} from "./movement";
 import {pipe} from "./functional";
-import {CROP, FARM, GRASS, PATH, PLANTED, WAREHOUSE} from "./itemTypes";
-import {CROP_GROWN, DEFAULT_EVENT, RESOURCE_PICKUP} from "./events/eventTypes";
+import {CROP, FARM, GRASS, PATH, PLANTED, ROCK, TREE, WAREHOUSE} from "./itemTypes";
+import {CROP_GROWN, DEFAULT_EVENT, RESOURCE_PICKUP, SLEEPING} from "./events/eventTypes";
 import {hasBehaviorForEvent, isEventVisible} from "./events/eventUtils";
 
 export const ATTACK = 'brigands/reducer/ATTACK';
@@ -55,39 +56,30 @@ const nextPlayer = (activePlayerId) => {
 
 const nextTurn = (turn, activePlayerId) => PLAYERS.slice(-1)[0] === activePlayerId ? turn + 1 : turn;
 
-const getWinner = (state) => {
-  return isLoser('ai', state.items) ? 'human' : isLoser('human', state.items) ? 'ai' : undefined;
-};
-
-const isLoser = (playerId, items) => {
-  return getItemsByPlayer(playerId, items).every((item) => item.hp <= 0);
-};
-
 const delegateToReducer = action => state => reducer(state, action);
 
-const consumeAp = (action, state) => {
-  const {condition} = action.payload;
-  // TODO require getAgent
-  const agent = action.payload.agentId !== undefined ? selectItemById(action.payload.agentId)(state) : action.payload.getAgent(state);
-  const selectedItem = {
-    ...agent,
-    ap: 0,
-    action,
-    condition,
-  };
-  // TODO rewrite without if
-  if (!!selectedItem.training) {
-    selectedItem.behaviorTraining.conditionalActions.push(action);
-  } else if (selectedItem.conditionalActions) {
-    const index = selectedItem.conditionalActions.findIndex(conditionalAction => conditionalAction.type === action.type);
-    if (index > 0) {
-      selectedItem.conditionalActions = selectedItem.conditionalActions.slice(index);
-    }
-  }
-  return updateItem(selectedItem)(state);
+const consumeAp = action => state => {
+  const {getAgent, apCost = () => () => 10} = action.payload;
+  const agent = getAgent(state);
+  return updateItem({...agent, ap: agent.ap - apCost(action)(state)})(state)
 };
 
-const postAction = action => state => consumeAp(action, state);
+const recordAction = action => state => {
+  const {getAgent} = action.payload;
+  const agent = getAgent(state);
+  return !agent.training ? state : updateItem(
+    {
+      ...agent,
+      behaviorTraining: {
+        ...agent.behaviorTraining,
+        conditionalActions: [...agent.behaviorTraining.conditionalActions, action]
+      }
+    })(state);
+};
+
+const postAction = action => state => {
+  return pipe(consumeAp(action), recordAction(action))(state);
+};
 
 const createBuilding = (getAgent, type, state) => {
   const builder = getAgent(state);
@@ -112,6 +104,11 @@ const createBuildingOn = getAgent => buildingType => targetId => state => {
 
 const plantedShouldGrow = turn => item => item.type === PLANTED && item.createdTurn + 5 <= turn;
 
+const getNextActions = getAgent => state => {
+  const {conditionalActions} = getAgent(state);
+  const index = conditionalActions.findIndex(conditionalAction => conditionalAction.payload.condition(getAgent)(state));
+  return index >= 0 ? conditionalActions.slice(index) : [];
+};
 
 const getNextAction = getAgent => state => conditionalActions => conditionalActions.find(conditionalAction => conditionalAction.payload.condition(getAgent)(state));
 
@@ -207,11 +204,17 @@ const moveCondition = getTarget => getAgent => state => {
 
 export const moveTowardTarget = getAgent => getTarget => {
   const condition = moveCondition(getTarget);
+  const apCost = action => state => {
+    const terrainItem = getItemsByXY(state.items)(action.payload.getAgent(state)).find(item => [PLANTED, TREE, ROCK, CROP, PATH].includes(item.type));
+
+    return terrainItem === PATH ? 5 : 10;
+  };
   return {
     type: MOVE,
     payload: {
       getAgent,
       getTarget,
+      apCost,
       condition,
     }
   }
@@ -291,8 +294,6 @@ export const restart = () => ({type: RESTART, payload: undefined});
 export const setSelectedItem = id => ({type: SET_SELECTED, payload: id});
 
 export const sleepOneTurn = getAgent => turn => {
-  //TODO refactor all conditions to accept getAgent
-  //TODO refactor conditionalAction to just be actions
   const condition = getAgent => state => state.turn <= turn;
   return {
     type: SLEEP,
@@ -329,7 +330,7 @@ const updateItemsByActivePlayer = fn => state => {
 };
 
 const replenishAp = state => {
-  const updateFn = item => ({...item, ap: item.ap < 1 ? item.ap + 1 : item.ap});
+  const updateFn = item => ({...item, ap: item.ap > 0 ? 10 : item.ap + 10});
   return updateItemsByActivePlayer(updateFn)(state);
 };
 
@@ -362,6 +363,16 @@ const setNextPlayer = state => ({
   activePlayerId: nextPlayer(selectActivePlayerId(state))
 });
 
+const updateConditionalActions = getAgent => state => {
+  const nextActions = getNextActions(getAgent)(state);
+  return updateItem({...getAgent(state), conditionalActions: nextActions})(state);
+};
+
+const performCurrentAction = getAgent => state => {
+  const actions = getAgent(state).conditionalActions;
+  return actions.length > 0 ? delegateToReducer(actions[0])(state) : state;
+};
+
 export default function reducer(state, action) {
   console.log('Action');
   console.log(action);
@@ -373,8 +384,12 @@ export default function reducer(state, action) {
     case AUTO_ACTION: {
       const {getAgent} = payload;
       const agent = getAgent(state);
-      const nextAction = getNextAction(getAgent)(state)(agent.conditionalActions);
-      return nextAction ? delegateToReducer(nextAction)(state) : pipe(delegateToReducer(setUnitBehaviorAction(getAgent)), delegateToReducer(action))(state);
+      if (agent.ap <= 0) {
+        return state;
+      }
+      //TODO simplify
+      const nextActions = getNextActions(getAgent)(state);
+      return nextActions.length > 0 ? pipe(updateConditionalActions(getAgent), performCurrentAction(getAgent), delegateToReducer(action))(state) : pipe(delegateToReducer(setUnitBehaviorAction(getAgent)), delegateToReducer(action))(state);
     }
     case RESTART: {
       const behaviors = state.behaviors;
@@ -412,13 +427,13 @@ export default function reducer(state, action) {
       return state;
     }
     case BUILD_FARM: {
-      return createBuilding(payload.getAgent, FARM, consumeAp(action, state));
+      return createBuilding(payload.getAgent, FARM, postAction(action)(state));
     }
     case BUILD_WAREHOUSE: {
-      return createBuilding(payload.getAgent, WAREHOUSE, consumeAp(action, state));
+      return createBuilding(payload.getAgent, WAREHOUSE, postAction(action)(state));
     }
     case PLANT_CROP: {
-      return createBuilding(payload.getAgent, PLANTED, consumeAp(action, state));
+      return createBuilding(payload.getAgent, PLANTED, postAction(action)(state));
     }
     case HARVEST_CROP: {
       const agent = payload.getAgent(state);
@@ -427,7 +442,7 @@ export default function reducer(state, action) {
         ...agent,
         resources: [...agent.resources, CROP]
       }, state);
-      return createBuildingOn(payload.getAgent)(GRASS)(target.id)(consumeAp(action, addedResourceState));
+      return createBuildingOn(payload.getAgent)(GRASS)(target.id)(postAction(action)(addedResourceState));
     }
     case LOAD_RESOURCE: {
       const agent = payload.getAgent(state);
@@ -526,11 +541,11 @@ export default function reducer(state, action) {
     case SLEEP: {
       const {getAgent} = payload;
       const agent = getAgent(state);
-      return updateItem({
+      return pipe(updateItem({
         ...agent,
-        activeEvent: {type: 'SLEEPING'},
+        activeEvent: {type: SLEEPING},
         conditionalActions: [action]
-      })(state)
+      }), consumeAp(action))(state)
     }
     default:
       return state;
