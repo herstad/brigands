@@ -1596,6 +1596,11 @@ ast-types-flow@0.0.7, ast-types-flow@^0.0.7:
   resolved "https://registry.yarnpkg.com/ast-types-flow/-/ast-types-flow-0.0.7.tgz#f70b735c6bca1a5c9c22d982c3e39e7feba3bdad"
   integrity sha1-9wtzXGvKGlycItmCw+Oef+ujva0=
 
+astar-algorithm@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/astar-algorithm/-/astar-algorithm-0.1.2.tgz#531c8e03caa419706af8baaf6d7bca8fd56fca0f"
+  integrity sha512-WwTHC7Yr5ACKB9QXgtE5N623lzeTAAExTncnNk1FmZoYY8Px2Due17t7RMGTMQarziovHcTyah0bZ9KoM0bPAg==
+
 astral-regex@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/astral-regex/-/astral-regex-1.0.0.tgz#6c8c3fb827dd43ee3918f27b82782ab7658a6fd9"
