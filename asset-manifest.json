@@ -1,13 +1,13 @@
 {
   "main.css": "/brigands/static/css/main.c4688234.chunk.css",
-  "main.js": "/brigands/static/js/main.53fef616.chunk.js",
-  "main.js.map": "/brigands/static/js/main.53fef616.chunk.js.map",
+  "main.js": "/brigands/static/js/main.37fcb536.chunk.js",
+  "main.js.map": "/brigands/static/js/main.37fcb536.chunk.js.map",
   "runtime~main.js": "/brigands/static/js/runtime~main.e566538e.js",
   "runtime~main.js.map": "/brigands/static/js/runtime~main.e566538e.js.map",
-  "static/js/2.8c2eaca3.chunk.js": "/brigands/static/js/2.8c2eaca3.chunk.js",
-  "static/js/2.8c2eaca3.chunk.js.map": "/brigands/static/js/2.8c2eaca3.chunk.js.map",
+  "static/js/2.f874b568.chunk.js": "/brigands/static/js/2.f874b568.chunk.js",
+  "static/js/2.f874b568.chunk.js.map": "/brigands/static/js/2.f874b568.chunk.js.map",
   "index.html": "/brigands/index.html",
-  "precache-manifest.e8a0219b448472bf7e8e69372f198ce2.js": "/brigands/precache-manifest.e8a0219b448472bf7e8e69372f198ce2.js",
+  "precache-manifest.c6af25cfae33febff9e6ac260597f285.js": "/brigands/precache-manifest.c6af25cfae33febff9e6ac260597f285.js",
   "service-worker.js": "/brigands/service-worker.js",
   "static/css/main.c4688234.chunk.css.map": "/brigands/static/css/main.c4688234.chunk.css.map"
 }
