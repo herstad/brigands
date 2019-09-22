@@ -1,5 +1,6 @@
 import astar from "astar-algorithm"
 import {calculateDistance} from "../movement";
+import {CROP, FARM, GRASS, PATH, PLANTED, ROCK, TREE, WAREHOUSE, WATER} from "../itemTypes";
 
 const MINIMUM_GCOST = 5;
 
@@ -18,7 +19,38 @@ const estimate = (nodeA, goal) => {
   return nodeA.gCost + (unknownSteps * MINIMUM_GCOST)
 };
 const mapEntry = node => [id(node), node];
-const nodeMap = nodes => new Map(nodes.map(mapEntry));
+
+const nodeMap = nodes => {
+  const filtered = new Map();
+  nodes.forEach(node => {
+    const currentNode = filtered.get(id(node));
+    if (!currentNode || node.gCost < currentNode.gCost) {
+      const [key, value] = mapEntry(node);
+      filtered.set(key, value);
+    }
+  });
+  return filtered;
+};
+
+const terrainCosts = {
+  [GRASS]: 10,
+  [TREE]: 20,
+  [PATH]: 5,
+  [ROCK]: 50,
+  [WATER]: 100,
+  [PLANTED]: 10,
+  [CROP]: 10,
+  [FARM]: 10,
+  [WAREHOUSE]: 10,
+  'default': 500,
+};
+
+export const terrainCost = type => terrainCosts[type] || terrainCosts['default'];
+
+export const itemToNode = ({x, y, type}) => ({x, y, gCost: terrainCost(type)});
+
+export const itemsToNodes = items => items.map(itemToNode);
+
 export const getCallbacks = nodes => goal => ({
   // It should return id / key / hash for a node
   id,
@@ -33,5 +65,8 @@ export const getCallbacks = nodes => goal => ({
 });
 
 export default function findPath(start, goal, nodes) {
-  return astar(start, goal, getCallbacks(nodeMap(nodes))(goal))
+  const filteredNodes = nodeMap(nodes);
+  const source = filteredNodes.get(id(start));
+  const target = filteredNodes.get(id(goal));
+  return astar(source, target, getCallbacks(filteredNodes)(target))
 }

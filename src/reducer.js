@@ -3,18 +3,18 @@ import {
   getItemById,
   getItemByXYAndType,
   getItemsByPlayer,
-  getItemsByXY,
   inRange,
   removeItemById,
   updateItem,
   updateItemById,
   updateItems
 } from "./itemsUtil";
-import {calculateDistance, move, toward} from "./movement";
+import {calculateDistance, move} from "./movement";
 import {pipe} from "./functional";
-import {CROP, FARM, GRASS, PATH, PLANTED, ROCK, TREE, WAREHOUSE} from "./itemTypes";
+import {CROP, FARM, GRASS, PATH, PLANTED, WAREHOUSE} from "./itemTypes";
 import {CROP_GROWN, DEFAULT_EVENT, RESOURCE_PICKUP, SLEEPING} from "./events/eventTypes";
 import {hasBehaviorForEvent, isEventVisible} from "./events/eventUtils";
+import findPath, {itemsToNodes, itemToNode} from "./movement/findPath";
 
 export const ATTACK = 'brigands/reducer/ATTACK';
 export const AUTO_ACTION = 'brigands/reducer/AUTO_ACTION';
@@ -204,11 +204,8 @@ const moveCondition = getTarget => getAgent => state => {
 
 export const moveTowardTarget = getAgent => getTarget => {
   const condition = moveCondition(getTarget);
-  const apCost = action => state => {
-    const terrainItem = getItemsByXY(state.items)(action.payload.getAgent(state)).find(item => [PLANTED, TREE, ROCK, CROP, PATH].includes(item.type));
-
-    return terrainItem === PATH ? 5 : 10;
-  };
+  //TODO move apCost to reducer
+  const apCost = action => state => 0;
   return {
     type: MOVE,
     payload: {
@@ -412,7 +409,9 @@ export default function reducer(state, action) {
     }
     case MOVE: {
       const {getAgent, getTarget} = payload;
-      const moveAgent = (s) => updateItem(move(getAgent(s), toward(getTarget(getAgent)(s))))(s);
+      const nodes = itemsToNodes(state.items);
+      const path = findPath(itemToNode(getAgent(state)), itemToNode(getTarget(getAgent)(state)), nodes);
+      const moveAgent = (s) => updateItem(move(getAgent(s), path[1]))(s);
       return pipe(moveAgent, delegateToReducer(makePath(getAgent)), postAction(action))(state);
     }
     case MAKE_PATH: {

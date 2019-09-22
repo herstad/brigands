@@ -1,4 +1,4 @@
-import {HUMAN, GRASS, PLAYER2, ROCK, TREE, WATER} from "./itemTypes";
+import {GRASS, HUMAN, PLAYER2, ROCK, TREE, WATER} from "./itemTypes";
 import {DEFAULT_EVENT} from "./events/eventTypes";
 
 export const PLAYERS = ['human', 'ai'];
@@ -41,7 +41,7 @@ const generateItems = (size = 10) => {
       hp: 5,
       type: HUMAN,
       playerId: 'human',
-      ap: 1,
+      ap: 10,
       behaviorName: 'farmer',
       conditionalActions: [],
       events: [],
@@ -53,7 +53,7 @@ const generateItems = (size = 10) => {
       hp: 5,
       type: PLAYER2,
       playerId: 'ai',
-      ap: 1,
+      ap: 10,
       behaviorName: 'brigand',
       conditionalActions: [],
       events: [],
@@ -65,7 +65,7 @@ const generateItems = (size = 10) => {
       hp: 5,
       type: HUMAN,
       playerId: 'human',
-      ap: 1,
+      ap: 10,
       behaviorName: 'farmer',
       conditionalActions: [],
       events: [],
@@ -77,7 +77,7 @@ const generateItems = (size = 10) => {
       hp: 5,
       type: HUMAN,
       playerId: 'human',
-      ap: 1,
+      ap: 10,
       behaviorName: 'hauler',
       conditionalActions: [],
       events: [],
