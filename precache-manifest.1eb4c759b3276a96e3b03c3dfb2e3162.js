@@ -1,11 +1,11 @@
 self.__precacheManifest = [
   {
-    "revision": "a383e3095f28db8f3b3f",
+    "revision": "770fcc15c979b60fc618",
     "url": "/brigands/static/css/main.c4688234.chunk.css"
   },
   {
-    "revision": "a383e3095f28db8f3b3f",
-    "url": "/brigands/static/js/main.37fcb536.chunk.js"
+    "revision": "770fcc15c979b60fc618",
+    "url": "/brigands/static/js/main.67ace594.chunk.js"
   },
   {
     "revision": "d0dac7203a2274108bee",
@@ -16,7 +16,7 @@ self.__precacheManifest = [
     "url": "/brigands/static/js/2.f874b568.chunk.js"
   },
   {
-    "revision": "7510a95c44a16f1659bba93034330550",
+    "revision": "7a9ec660626418b1b1c5ad72eebfb63d",
     "url": "/brigands/index.html"
   }
 ];
